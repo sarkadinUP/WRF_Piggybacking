@@ -1,0 +1,184 @@
+state    real   qnwfa_pg_now      igj      dyn_em      1        Z     -   "QNWFA_PG_NOW"   "num water-friendly aerosol Now"   "kg-1"
+state    real   qnifa_pg_now      igj      dyn_em      1        Z     -   "QNIFA_PG_NOW"   "num ice-friendly aerosol Now"   "kg-1"
+state    real   phb_pg         ikj     dyn_em      1         Z      irhdus  "phb_pg"    "base-state geopotential PG"           "m2 s-2"
+state    real   t_pg              ikjb     dyn_em      2         -     \
+       i0rhusdf=(bdy_interp:dt)   "t_pg"      "piggybacking perturbation potential temperature (theta-t0)" "K"
+state    real   t_init_pg         ikj     dyn_em      1         -      ird       "t_init_pg" "piggybacking initial potential temperature" "K"
+i1       real   t_tend_pg         ikj     dyn_em      1         -  
+i1       real   t_tendf_pg        ikj     dyn_em      1         -  
+i1       real   t_2save_pg        ikj     dyn_em      1         -   
+state    real   t_save_pg         ikj     dyn_em      1         -      -        "t_save_pg"
+state    real   mub_pg             ij     dyn_em      1         -     irhdus       "mub_pg" "piggybacking base state dry air mass in column" "Pa"
+state    real   alb_pg            ikj     dyn_em      1         -      rdus      "alb_pg"         "piggybacking inverse base density"          "m3 kg-1"
+state    real   pb_pg             ikj     dyn_em      1         -      irhdus    "pb_pg"          "piggybacking BASE STATE PRESSURE "          "Pa"
+state    real    t_base_pg         k       dyn_em      1         -     ir        "t_base_pg"               "piggybacking BASE STATE T IN IDEALIZED CASES"         "K"      
+state    real   Q2_PG               ij     misc        1         -     irh0{22}{23}du     "Q2_PG"                   "piggybacking QV at 2 M"         "kg kg-1"
+state    real   T2_PG               ij     misc        1         -     i01rh0{22}{23}du   "T2_PG"                   "piggybacking TEMP at 2 M"       "K"
+state    real   TH2_PG              ij     misc        1         -     irhdu     "TH2_PG"                  "piggybacking POT TEMP at 2 M"   "K"
+state    real   qnwfa2d_pg       ij     misc        1         -     rhdu     "QNWFA2D_PG"     "Surface aerosol number conc emission PG"  "kg-1 s-1"
+# Piggybacking Scalar (4D) arrays
+state   real    qv_pg             ijkftb   scalar       1         -     \
+   i0rhusdf=(bdy_interp:dt)  "QVAPOR_PG"        "Piggybacking Water vapor mixing ratio"      "kg kg(-1)"
+state   real    qc_pg             ijkftb   scalar       1         -     \
+   i0rhusdf=(bdy_interp:dt)  "QCLOUD_PG"        "Piggybacking Cloud water mixing ratio"      "kg kg(-1)"
+state   real    qr_pg             ijkftb   scalar       1         -     \
+   i0rhusdf=(bdy_interp:dt)  "QRAIN_PG"         "Piggybacking Rain water mixing ratio"       "kg kg(-1)"
+state   real    qi_pg             ijkftb   scalar       1         -     \
+   i0rhusdf=(bdy_interp:dt)  "QICE_PG"          "Piggybacking Ice mixing ratio"              "kg kg(-1)"
+state   real    qs_pg             ijkftb   scalar       1         -     \
+   i0rhusdf=(bdy_interp:dt)  "QSNOW_PG"         "Piggybacking Snow mixing ratio"             "kg kg(-1)"
+state   real    qg_pg             ijkftb   scalar       1         -     \
+   i0rhusdf=(bdy_interp:dt)  "QGRAUP_PG"        "Piggybacking Graupel mixing ratio"          "kg kg(-1)"
+state   real    qh_pg             ijkftb   scalar       1         -     \
+   i0rhusdf=(bdy_interp:dt)  "QHAIL_PG"         "Piggybacking Hail mixing ratio"             "kg kg(-1)"
+state   real    qndrop_pg         ijkftb   scalar      1         -     \
+   i0rhusdf=(bdy_interp:dt)  "QNDROP_PG"        "Piggybacking Droplet number mixing ratio"   "# kg(-1)"
+state   real    qni_pg            ijkftb   scalar      1         -     \
+   i0rhusdf=(bdy_interp:dt)  "QNICE_PG"         "Piggybacking Ice Number concentration"      "# kg(-1)"
+state   real    qt_pg             ijkftb   scalar      1         -     \
+   i0rhusdf=(bdy_interp:dt)  "CWM_PG"           "Piggybacking Total condensate mixing ratio" "kg kg(-1)"
+state   real    qns_pg            ijkftb   scalar      1         -     \
+   i0rhusdf=(bdy_interp:dt)  "QNSNOW_PG"        "Piggybacking Snow Number concentration"     "# kg(-1)"
+state   real    qnr_pg            ijkftb   scalar      1         -     \
+   i0rhusdf=(bdy_interp:dt)  "QNRAIN_PG"        "Piggybacking Rain Number concentration"     "# kg(-1)"
+state   real    qng_pg            ijkftb   scalar      1         -     \
+   i0rhusdf=(bdy_interp:dt)  "QNGRAUPEL_PG"     "Piggybacking Graupel Number concentration"  "# kg(-1)"
+state   real    qnh_pg            ijkftb   scalar      1         -     \
+   i0rhusdf=(bdy_interp:dt)  "QNHAIL_PG"        "Piggybacking Hail Number concentration"     "# kg(-1)"
+state   real    qnn_pg            ijkftb   scalar      1         -     \
+   i0rhusdf=(bdy_interp:dt)  "QNCCN_PG"         "Piggybacking CCN Number concentration"      "# kg(-1)"
+state   real    qnc_pg            ijkftb   scalar      1         -     \
+   i0rhusdf=(bdy_interp:dt)  "QNCLOUD_PG"       "Piggybacking cloud water Number concentration" "# kg(-1)"
+state   real    qvolg_pg          ijkftb   scalar      1         -     \
+   i0rhusdf=(bdy_interp:dt)  "QVGRAUPEL_PG"     "Piggybacking Graupel Particle Volume"       "m(3) kg(-1)"
+state   real    qvolh_pg          ijkftb   scalar      1         -     \
+   i0rhusdf=(bdy_interp:dt)  "QVHAIL_PG"        "Piggybacking Hail Particle Volume"          "m(3) kg(-1)"
+state   real    qnwfa_pg          ikjftb  scalar       1         -     \
+   i0rhusdf=(bdy_interp:dt)  "QNWFA_PG"         "Piggybacking water-friendly aerosol number con" "# kg(-1)"
+state   real    qnifa_pg          ikjftb  scalar       1         -     \
+   i0rhusdf=(bdy_interp:dt)  "QNIFA_PG"         "Piggybacking ice-friendly aerosol number con"   "# kg(-1)"
+
+state   real    dfi_qv_pg         ikjftb   dfi_scalar       1         -     \
+   rusdf=(bdy_interp:dt)  "DFI_QVAPOR_PG"       "Piggybacking Water vapor mixing ratio"      "kg kg(-1)"
+state   real    dfi_qc_pg         ikjftb   dfi_scalar       1         -     \
+   rusdf=(bdy_interp:dt)  "DFI_QCLOUD_PG"       "Piggybacking Cloud water mixing ratio"      "kg kg(-1)"
+state   real    dfi_qr_pg         ikjftb   dfi_scalar       1         -     \
+   rusdf=(bdy_interp:dt)  "DFI_QRAIN_PG"        "Piggybacking Rain water mixing ratio"       "kg kg(-1)"
+state   real    dfi_qi_pg         ikjftb   dfi_scalar       1         -     \
+   rusdf=(bdy_interp:dt)  "DFI_QICE_PG"         "Piggybacking Ice mixing ratio"              "kg kg(-1)"
+state   real    dfi_qs_pg         ikjftb   dfi_scalar       1         -     \
+   rusdf=(bdy_interp:dt)  "DFI_QSNOW_PG"        "Piggybacking Snow mixing ratio"             "kg kg(-1)"
+state   real    dfi_qg_pg         ikjftb   dfi_scalar       1         -     \
+   rusdf=(bdy_interp:dt)  "DFI_QGRAUP_PG"       "Piggybacking Graupel mixing ratio"          "kg kg(-1)"
+state   real    dfi_qh_pg         ikjftb   dfi_scalar       1         -     \
+   rusdf=(bdy_interp:dt)  "DFI_QHAIL_PG"        "Piggybacking Hail mixing ratio"             "kg kg(-1)"
+state   real    dfi_qndrop_pg     ikjftb  dfi_scalar      1         -     \
+   rusdf=(bdy_interp:dt)    "DFI_QNDROP_PG"    "Piggybacking DFI Droplet number mixing ratio"        "# kg(-1)"
+state   real    dfi_qni_pg        ikjftb  dfi_scalar      1         -     \
+   rusdf=(bdy_interp:dt)    "DFI_QNICE_PG"     "Piggybacking DFI Ice Number concentration" "# kg(-1)"
+state   real    dfi_qt_pg         ikjftb  dfi_scalar      1         -     \
+   rusdf=(bdy_interp:dt)    "DFI_CWM_PG"       "Piggybacking DFI Total condensate mixing ratio"      "kg kg(-1)"
+state   real    dfi_qns_pg        ikjftb  dfi_scalar      1         -     \
+   rusdf=(bdy_interp:dt)    "DFI_QNSNOW_PG"    "Piggybacking DFI Snow Number concentration"   "# kg(-1)"
+state   real    dfi_qnr_pg        ikjftb  dfi_scalar      1         -     \
+   rusdf=(bdy_interp:dt)    "DFI_QNRAIN_PG"    "Piggybacking DFI Rain Number concentration"   "# kg(-1)"
+state   real    dfi_qng_pg        ikjftb  dfi_scalar      1         -     \
+   rusdf=(bdy_interp:dt)    "DFI_QNGRAUPEL_PG" "Piggybacking DFI Graupel Number concentration" "# kg(-1)"
+state   real    dfi_qnh_pg        ikjftb  dfi_scalar      1         -     \
+   rusdf=(bdy_interp:dt)    "DFI_QNHAIL_PG"    "Piggybacking DFI Hail Number concentration" "# kg(-1)"
+state   real    dfi_qnn_pg        ikjftb  dfi_scalar      1         -     \
+   rusdf=(bdy_interp:dt)    "DFI_QNCC_PG"      "Piggybacking DFI CNN Number concentration"   "# kg(-1)"
+state   real    dfi_qnc_pg        ikjftb  dfi_scalar      1         -     \
+   rusdf=(bdy_interp:dt)    "DFI_QNCLOUD_PG"   "Piggybacking DFI Cloud Number concentration" "# kg(-1)"
+state   real    dfi_qnwfa_pg      ikjftb  dfi_scalar      1         -     \
+   i0rhusdf=(bdy_interp:dt) "DFI_QNWFA_PG"     "Piggybacking DFI water-friendly aerosol number con" "# kg(-1)"
+state   real    dfi_qnifa_pg      ikjftb  dfi_scalar      1         -     \
+   i0rhusdf=(bdy_interp:dt) "DFI_QNIFA_PG"     "Piggybacking DFI ice-friendly aerosol number con"   "# kg(-1)"
+state   real    dfi_qvolg_pg      ikjftb  dfi_scalar      1         -     \
+   rhusdf=(bdy_interp:dt)   "DFI_QVGRAUPEL_PG" "Piggybacking DFI Graupel Particle Volume" "m(3) kg(-1)"
+state   real    dfi_qvolh_pg     ikjftb  dfi_scalar      1         -     \
+   rhusdf=(bdy_interp:dt)   "DFI_QVHAIL_PG"    "Piggybacking DFI Hail Particle Volume" "m(3) kg(-1)"
+
+# Piggybacking variables
+
+state   real   dfi_tten_rad_pg    ikj     misc        1         -     ir             "RAD_TTEN_DFI_PG"  "RADAR POT. TEMP. TENDENCY PG"     "K s(-1)"
+state   real    h_diabatic_pg     ikj     misc        1         -     rdu            "h_diabatic_pg"    "PG MICROPHYSICS LATENT HEATING"  "K s(-1)"      
+state   real    qv_diabatic_pg    ikj     misc        1         -     rdu            "qv_diabatic_pg"   "PG MICROPHYSICS QV TENDENCY"     "g g-1 s(-1)"      
+state   real    qc_diabatic_pg    ikj     misc        1         -     rdu            "qc_diabatic_pg"   "PG MICROPHYSICS QC TENDENCY"     "g g-1 s(-1)"
+state    real   qv_base_pg        k        misc        1         -      ir     "qv_base_pg" "PG BASE STATE QV IN IDEALIZED CASES" ""      
+state    real   p_top_pg          -       misc        -         -      irh     "p_top_pg"  "PRESSURE TOP OF THE MODEL PG"         "Pa"
+
+state    real  RAINCPG            ij      misc        1         -      rdu     "RAINCPG"                 "PG ACCUMULATED TOTAL CUMULUS PRECIPITATION"                 "mm"      
+state    real  RAINSHPG           ij      misc        1         -      rdu     "RAINSHPG"                "PG ACCUMULATED SHALLOW CUMULUS PRECIPITATION"               "mm"
+state    real  RAINNCPG           ij      misc        1         -      rhdu     "RAINNCPG"                "PG ACCUMULATED TOTAL GRID SCALE PRECIPITATION"              "mm"
+state    real  RAINCVPG           ij      misc        1         -      r        "RAINCVPG"                "PG TIME-STEP CUMULUS PRECIPITATION"                         "mm"
+state    real  RAINSHVPG          ij      misc        1         -      r        "RAINSHVPG"               "PG TIME-STEP SHALLOW CUMULUS PRECIPITATION"                 "mm"
+state    real  RAINNCVPG          ij      misc        1         -      r        "RAINNCVPG"               "PG TIME-STEP NONCONVECTIVE PRECIPITATION"                   "mm"
+state    real  SNOWNCPG           ij      misc        1         -     rhdu           "SNOWNCPG"         "PG ACCUMULATED TOTAL GRID SCALE SNOW AND ICE"                  "mm"
+state    real  GRAUPELNCPG        ij      misc        1         -     rhdu           "GRAUPELNCPG"      "PG ACCUMULATED TOTAL GRID SCALE GRAUPEL"                       "mm"
+state    real  HAILNCPG           ij      misc        1         -     rhdu           "HAILNCPG"         "PG ACCUMULATED TOTAL GRID SCALE HAIL"                          "mm"
+state    real  SNOWNCVPG          ij      misc        1         -     r              "SNOWNCVPG"        "PG TIME-STEP NONCONVECTIVE SNOW AND ICE"                       "mm"
+state    real  GRAUPELNCVPG       ij      misc        1         -     r              "GRAUPELNCVPG"     "PG TIME-STEP NONCONVECTIVE GRAUPEL"                            "mm"
+state    real  HAILNCVPG          ij      misc        1         -     r              "HAILNCVPG"        "PG TIME-STEP NONCONVECTIVE HAIL"                               "mm"
+state    real  refl_10cm_pg       ikj     dyn_em      1         -     hdu            "refl_10cm_pg"     "PG Radar reflectivity (lamda = 10 cm)"                         "dBZ"
+state    real  RTHFTENPG          ikj     misc        1         -     r              "RTHFTENPG"        "PG TOTAL ADVECTIVE POTENTIAL TEMPERATURE TENDENCY"    "K s(-1)"
+state    real  RQVFTENPG          ikj     misc        1         -     r              "RQVFTENPG"        "PG TOTAL ADVECTIVE scalarURE TENDENCY"                "kg kg(-1) s(-1)"
+state    real  RTHRATENPG        ikj      misc        1         -      rd       "RTHRATENPG"              "PG COUPLED THETA TENDENCY DUE TO RADIATION"              "Pa K s-1"
+state    real  CLDFRA_PG          ikj      misc        1         -      r       "CLDFRA_PG"                "PG CLOUD FRACTION"                                       ""
+state    real  RTHBLTENPG        ikj      misc        1         -      r        "RTHBLTENPG"              "PG COUPLED THETA TENDENCY DUE TO PBL PARAMETERIZATION"   "Pa K s-1"
+state    real  RQVBLTENPG        ikj      misc        1         -      r        "RQVBLTENPG"              "PG COUPLED Q_V TENDENCY DUE TO PBL PARAMETERIZATION"     "Pa kg kg-1 s-1"
+state    real  RQCBLTENPG        ikj      misc        1         -      r        "RQCBLTENPG"              "PG COUPLED Q_C TENDENCY DUE TO PBL PARAMETERIZATION"     "Pa kg kg-1 s-1"
+state    real  RQIBLTENPG        ikj      misc        1         -      r        "RQIBLTENPG"              "PG COUPLED Q_I TENDENCY DUE TO PBL PARAMETERIZATION"     "Pa kg kg-1 s-1"
+state    real  RQNIBLTENPG       ikj      misc        1         -      r        "RQNIBLTENPG"             "PG COUPLED Q_NI TENDENCY DUE TO PBL PARAMETERIZATION"    "Pa #  kg-1 s-1"
+
+i1       real   th_phy_pg         ikj      misc        1         -
+state    real   t_phy_pg          ikj      misc        1         -      r      "T_PHY_PG"   "Piggybacking Temperature"            "K"
+i1       real   t8w_pg            ikj      misc        1         Z
+state    real  HFX_PG              ij      misc        1         -      rh       "HFX_PG"                   "PG UPWARD HEAT FLUX AT THE SURFACE"              "W m-2"
+state    real  QFX_PG              ij      misc        1         -      rh       "QFX_PG"                   "PG UPWARD MOISTURE FLUX AT THE SURFACE"          "kg m-2 s-1"
+state    real  LH_PG               ij      misc        1         -      rh       "LH_PG"                    "PG LATENT HEAT FLUX AT THE SURFACE"              "W m-2"
+
+state    real  sr_pg              ij      dyn_em      1         -     irh            "sr_pg"            "PG fraction of frozen precipitation"
+
+rconfig   integer     mp_physics_pg       namelist,physics      max_domains    0      irh       "mp_physics_pg"            ""      ""
+rconfig   integer     do_piggyback        namelist,physics      1           0       rh        "piggybacking with microphysics"                 ""      ""
+rconfig   integer     diag_mp_pg_init     namelist,physics         1           0      irh    "initialize piggybacking microphysics"
+
+ifdef DA_CORE=0
+package   passiveqv_pg       mp_physics_pg==0                -             scalar:qv_pg
+package   kesslerscheme_pg   mp_physics_pg==1                -             scalar:qv_pg,qc_pg,qr_pg
+package   linscheme_pg       mp_physics_pg==2                -             scalar:qv_pg,qc_pg,qr_pg,qi_pg,qs_pg,qg_pg
+package   wsm3scheme_pg      mp_physics_pg==3                -             scalar:qv_pg,qc_pg,qr_pg;state:re_cloud,re_ice,re_snow
+package   wsm5scheme_pg      mp_physics_pg==4                -             scalar:qv_pg,qc_pg,qr_pg,qi_pg,qs_pg;state:re_cloud,re_ice,re_snow
+package   etamp_hr_pg        mp_physics_pg==5                -             scalar:qv_pg,qc_pg,qr_pg,qs_pg,qt_pg;state:f_ice_phy,f_rain_phy,f_rimef_phy
+package   wsm6scheme_pg      mp_physics_pg==6                -             scalar:qv_pg,qc_pg,qr_pg,qi_pg,qs_pg,qg_pg;state:re_cloud,re_ice,re_snow
+package   gsfcgcescheme_pg   mp_physics_pg==7                -             scalar:qv_pg,qc_pg,qr_pg,qi_pg,qs_pg,qg_pg
+package   thompson_pg        mp_physics_pg==8                -             scalar:qv_pg,qc_pg,qr_pg,qi_pg,qs_pg,qg_pg,qni_pg,qnr_pg;state:re_cloud,re_ice,re_snow
+
+package   milbrandt2mom_pg   mp_physics_pg==9                -             scalar:qv_pg,qc_pg,qr_pg,qi_pg,qs_pg,qg_pg,qh_pg,qnc_pg,qnr_pg,qni_pg,qns_pg,qng_pg,qnh_pg
+package   morr_two_moment_pg mp_physics_pg==10               -             scalar:qv_pg,qc_pg,qr_pg,qi_pg,qs_pg,qg_pg,qni_pg,qns_pg,qnr_pg,qng_pg
+package   cammgmpscheme_pg   mp_physics_pg==11               -             scalar:qv_pg,qc_pg,qi_pg,qr_pg,qs_pg,qnc_pg,qni_pg,qnr_pg,qns_pg;state:rh_old_mp,lcd_old_mp,cldfra_old_mp,cldfra_mp,cldfra_mp_all,cldfra_conv,cldfrai,cldfral,turbtype3d,smaw3d,wsedl3d,icwmrdp3d,dp3d,shfrc3d,dlf,dlf2,tke_pbl,lradius,iradius
+#package   milbrandt3mom_pg  mp_physics_pg==12               -             scalar:qv_pg,qc_pg,qr_pg,qi_pg,qs_pg,qg_pg,qh_pg,qnc_pg,qnr_pg,qni_pg,qns_pg,qng_pg,qnh_pg,qzr_pg,qzi_pg,qzs_pg,qzg_pg,qzh_pg
+package   sbu_ylinscheme_pg  mp_physics_pg==13               -             scalar:qv_pg,qc_pg,qr_pg,qi_pg,qs_pg;state:rimi
+package   wdm5scheme_pg      mp_physics_pg==14               -             scalar:qv_pg,qc_pg,qr_pg,qi_pg,qs_pg,qnn_pg,qnc_pg,qnr_pg;state:re_cloud,re_ice,re_snow
+package   wdm6scheme_pg      mp_physics_pg==16               -             scalar:qv_pg,qc_pg,qr_pg,qi_pg,qs_pg,qg_pg,qnn_pg,qnc_pg,qnr_pg;state:re_cloud,re_ice,re_snow
+package   nssl_2mom_pg       mp_physics_pg==17               -             scalar:qv_pg,qc_pg,qr_pg,qi_pg,qs_pg,qg_pg,qh_pg,qnc_pg,qndrop_pg,qnr_pg,qni_pg,qns_pg,qng_pg,qnh_pg,qvolg_pg,qvolh_pg;state:re_cloud,re_ice,re_snow
+package   nssl_2momccn_pg    mp_physics_pg==18               -             scalar:qv_pg,qc_pg,qr_pg,qi_pg,qs_pg,qg_pg,qh_pg,qnn_pg,qndrop_pg,qnr_pg,qni_pg,qns_pg,qng_pg,qnh_pg,qvolg_pg,qvolh_pg;state:re_cloud,re_ice,re_snow
+package   nssl_1mom_pg       mp_physics_pg==19               -             scalar:qv_pg,qc_pg,qr_pg,qi_pg,qs_pg,qg_pg,qh_pg,qvolg_pg
+package   nssl_1momlfo_pg    mp_physics_pg==21               -             scalar:qv_pg,qc_pg,qr_pg,qi_pg,qs_pg,qg_pg
+package   nssl_2momg_pg      mp_physics_pg==22               -             scalar:qv_pg,qc_pg,qr_pg,qi_pg,qs_pg,qg_pg,qndrop_pg,qnr_pg,qni_pg,qns_pg,qng_pg,qvolg_pg;state:re_cloud,re_ice,re_snow
+package   thompsonaero_pg    mp_physics_pg==28               -             scalar:qv_pg,qc_pg,qr_pg,qi_pg,qs_pg,qg_pg,qni_pg,qnr_pg,qnc_pg,qnwfa_pg,qnifa_pg;state:re_cloud,re_ice,re_snow,qnwfa2d_pg
+
+package   etampnew_pg       mp_physics_pg==95               -             scalar:qv_pg,qc_pg,qr_pg,qs_pg,qt_pg;state:f_ice_phy,f_rain_phy,f_rimef_phy
+
+endif
+
+state    real   t_pg_xxx           ikjx    -           1         -
+
+state real field_t_tend_pg_perturb i{stoclev}j dyn_em 1 - rhdf=(p2c) "field_t_tend_pg_perturb" "field used to perturb t in the boundaries piggyback" ""
+state    real   th_old_pg         ikj      misc        1         -      rusd   "TH_OLD_PG"              "Old Value of Th PG"      "K"
+state    real   qv_old_pg         ikj      misc        1         -      rusd   "QV_OLD_PG"       
+state    real   rt_tendf_pg_stoch  i{stoclev}j  dyn_em 1 -   rhdf=(p2c) "rt_tendf_pg_stoch" "stochastic forcing, T piggyback " "K/s"
+state    real   a_t_pg            ijk     misc        2         -      rh       "A_T_PG"      "perturbation potential temperature (theta-t0) piggyback" "K"
+state    real   g_t_pg            ijk     misc        2         -      rh       "G_T_PG"      "perturbation potential temperature (theta-t0) piggyback" "K"
+
