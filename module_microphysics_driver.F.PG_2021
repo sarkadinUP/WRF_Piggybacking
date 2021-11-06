@@ -20,15 +20,23 @@ SUBROUTINE microphysics_driver(				 &
      		     ,dgnumwet4D, rate1ord_cw2pr_st3d                    &
 #endif
 		     ,mp_physics, mp_physics_pg, mp_restart_state   	 &
+		     ,t_old, t_old_pg, moist_old, moist, scalar_old      &
+		     ,n_moist, n_scalar, ssw, ssi, ssw_pg, ssi_pg        &
+		     ,scalar, num_scalar_x                               &
 		     ,th_old, th_old_pg, qv_old, qv_old_pg               &
-		     ,scalar,num_scalar_x  	 			 &
+                     ,DNW_ACTV,DNW_COAG,DNW_BRUP,DNI_COLL,DMW_DIFF       &  ! for mp_detailed
+                     ,DMW_MELT,DMI_DIFF,DMWI_MELT,DMWI_DIFF,DMW_RIME     &  ! for mp_detailed
+                     ,DMW_FREZ,DMG_RIME                                  &  ! for mp_detailed
+                     ,DNW_ACTV_PG,DNW_COAG_PG,DNW_BRUP_PG,DNI_COLL_PG    &
+	  	     ,DMW_DIFF_PG,DMW_MELT_PG,DMI_DIFF_PG,DMWI_MELT_PG   &
+		     ,DMWI_DIFF_PG,DMW_RIME_PG,DMW_FREZ_PG,DMG_RIME_PG   &
                      ,ids,ide, jds,jde, kds,kde                          &
                      ,ims,ime, jms,jme, kms,kme                          &
                      ,ips,ipe, jps,jpe, kps,kpe                          &
                      ,i_start,i_end,j_start,j_end,kts,kte                &
                      ,num_tiles, naer                                    &
 		     ,dlf,dlf2,t_phy,t_phy_pg, p_hyd,p8w_hyd,tke_pbl     &
-                     ,z_at_w,qfx				         &
+                     ,z_at_w,qfx,qfx_pg				         &
                      ,rliq,turbtype3d,smaw3d,wsedl3d,cldfra_old_mp       &
                      ,cldfra_mp,cldfra_mp_all,lradius,iradius            &
                      ,cldfrai,cldfral,cldfra_conv,alt                    &
@@ -61,9 +69,15 @@ SUBROUTINE microphysics_driver(				 &
 		    ! ,f_qzr, f_qzi, f_qzs, f_qzg, f_qzh                  &
 	             ,qvolg_curr, qvolh_curr				 &
 		     ,fx_qvolg, fx_qvolh				 &
+                     ,qa1_curr, qa1c_curr, qa1r_curr, qa1i_curr          &
+		     ,fx_qa1, fx_qa1c, fx_qa1r, fx_qa1i                  &
+		     ,qa1s_curr, qa1g_curr, qna1_curr, qna1c_curr        &
+		     ,fx_qa1s, fx_qa1g, fx_qna1, fx_qna1c                &
+		     ,qna1r_curr, qna1i_curr, qna1s_curr, qna1g_curr     &
+		     ,fx_qna1r, fx_qna1i, fx_qna1s, fx_qna1g             &
 		     ,qrcuten_pg, qscuten_pg, qicuten_pg                 &  ! MORR_TWO_MOMENT TEST PIGGYBACK, 2018. 06. 29. Added by SN
 		     ,qrcuten, qscuten, qicuten, mu, hail, ice2          &
-                   ! , ccntype			     	   		  &
+                    ! , ccntype			     	   		  &
 		     ,ri_curr, re_cloud, re_ice, re_snow, has_reqc       &
 		     ,has_reqi, has_reqs, qnwfa2d, qnwfa2d_pg            &
 		     ,diagflag, do_radar_ref, diagpiggy, do_piggyback    &
@@ -89,9 +103,16 @@ SUBROUTINE microphysics_driver(				 &
 		! ,qzr_pg_curr, qzi_pg_curr, qzs_pg_curr, qzg_pg_curr, qzh_pg_curr   &
 		! ,f_pg_qzr, f_pg_qzi, f_pg_qzs, f_pg_qzg, f_pg_qzh                  &
 	         ,qvolg_pg_curr, qvolh_pg_curr					 &
-		 ,fx_pg_qvolg, fx_pg_qvolh		)		         
+		 ,fx_pg_qvolg, fx_pg_qvolh				         &
+                 ,qa1_pg_curr, qa1c_pg_curr, qa1r_pg_curr, qa1i_pg_curr          &
+		 ,fx_pg_qa1, fx_pg_qa1c, fx_pg_qa1r, fx_pg_qa1i                  &
+		 ,qa1s_pg_curr, qa1g_pg_curr, qna1_pg_curr, qna1c_pg_curr        &
+		 ,fx_pg_qa1s, fx_pg_qa1g, fx_pg_qna1, fx_pg_qna1c                &
+		 ,qna1r_pg_curr, qna1i_pg_curr, qna1s_pg_curr, qna1g_pg_curr     &
+		 ,fx_pg_qna1r, fx_pg_qna1i, fx_pg_qna1s, fx_pg_qna1g             &				 
 ! <<< Piggybacking					 
-							
+									)
+
 ! Framework
 #if(NMM_CORE==1)
    USE module_state_description, ONLY :                                  &
@@ -114,12 +135,13 @@ SUBROUTINE microphysics_driver(				 &
                     ,GSFCGCESCHEME, WDM5SCHEME, WDM6SCHEME, NSSL_2MOM, NSSL_2MOMCCN, NSSL_2MOMG  &
                     ,NSSL_1MOM,NSSL_1MOMLFO & ! ,NSSL_3MOM       &
                     ,MILBRANDT2MOM , CAMMGMPSCHEME,FULL_KHAIN_LYNN & !,MILBRANDT3MOM
+                    ,DETAILED
 ! >>> PG microphysics schemes
                     ,KESSLERSCHEME_PG, LINSCHEME_PG, SBU_YLINSCHEME_PG, WSM3SCHEME_PG, WSM5SCHEME_PG    &
                     ,WSM6SCHEME_PG, ETAMPNEW_PG, ETAMP_HR_PG, THOMPSON_PG, THOMPSONAERO_PG, MORR_TWO_MOMENT_PG     &  !FAST_KHAIN_LYNN_PG
                     ,GSFCGCESCHEME_PG, WDM5SCHEME_PG, WDM6SCHEME_PG, NSSL_2MOM_PG, NSSL_2MOMCCN_PG, NSSL_2MOMG_PG  &
                     ,NSSL_1MOM_PG,NSSL_1MOMLFO_PG & ! ,NSSL_3MOM_PG       &
-                    ,MILBRANDT2MOM_PG , CAMMGMPSCHEME_PG  !,MILBRANDT3MOM_PG, FULL_KHAIN_LYNN_PG
+                    ,MILBRANDT2MOM_PG , CAMMGMPSCHEME_PG & !,MILBRANDT3MOM_PG, FULL_KHAIN_LYNN_PG
 ! >>> PG microphysics schemes
 
 #endif
@@ -149,6 +171,7 @@ SUBROUTINE microphysics_driver(				 &
    USE module_mp_wsm6
    USE module_mp_etanew
    USE module_mp_thompson
+   USE module_mp_detailed
    USE module_mp_full_sbm
    USE module_mp_fast_sbm
    USE module_mp_gsfcgce
@@ -331,7 +354,7 @@ SUBROUTINE microphysics_driver(				 &
 
    TYPE(grid_config_rec_type),  INTENT(IN   ) , OPTIONAL   :: config_flags
    INTEGER,    INTENT(IN   )    :: mp_physics
-   INTEGER, OPTIONAL,  INTENT(IN   )    :: mp_physics_pg
+   INTEGER,    INTENT(IN   )    :: mp_physics_pg
    LOGICAL,    INTENT(IN   )    :: specified
    INTEGER, OPTIONAL, INTENT(IN   )    :: chem_opt, progn
    INTEGER, OPTIONAL, INTENT(IN   )    :: hail, ice2  !, ccntype
@@ -348,9 +371,8 @@ SUBROUTINE microphysics_driver(				 &
 !
    REAL, DIMENSION( ims:ime , kms:kme , jms:jme ),                    &
          INTENT(INOUT) ::                                         th
-		 
-   REAL, DIMENSION( ims:ime , kms:kme , jms:jme ),          &
-         INTENT(INOUT),OPTIONAL ::                             th_pg
+   REAL, DIMENSION( ims:ime , kms:kme , jms:jme ),                    &
+         INTENT(INOUT), OPTIONAL ::                   th_pg
 !
 
 !
@@ -363,7 +385,7 @@ SUBROUTINE microphysics_driver(				 &
                                                                    p
     REAL, DIMENSION( ims:ime , kms:kme , jms:jme ),INTENT(INOUT), OPTIONAL :: th_old,qv_old
     REAL, DIMENSION( ims:ime , kms:kme , jms:jme ),INTENT(INOUT), OPTIONAL :: th_old_pg,qv_old_pg
-    REAL,DIMENSION(ims:ime,kms:kme,jms:jme,num_scalar_x),INTENT(INOUT), OPTIONAL   :: scalar
+!    REAL,DIMENSION(ims:ime,kms:kme,jms:jme,num_scalar_x),INTENT(INOUT), OPTIONAL   :: scalar
     INTEGER, DIMENSION( ims:ime , jms:jme ), INTENT(IN), OPTIONAL::   IVGTYP
     REAL, DIMENSION( ims:ime, jms:jme ), INTENT(IN), OPTIONAL    :: XLAT, XLONG
 
@@ -377,7 +399,7 @@ SUBROUTINE microphysics_driver(				 &
 !2D variables required for CAMMGMP scheme
    REAL, DIMENSION( ims:ime, jms:jme ),                               &
         INTENT(IN), OPTIONAL ::                                                 &
-                                                                 qfx, &    !Moisture flux at surface (kg m-2 s-1)
+                                                                 qfx,qfx_pg, &    !Moisture flux at surface (kg m-2 s-1)
                                                                  rliq      !Vertically-integrated reserved cloud condensate(m/s)
  
  !3D variables required for CAMMGMP scheme
@@ -386,7 +408,7 @@ SUBROUTINE microphysics_driver(				 &
                                                                  dlf, &    !Detraining cloud water tendendcy
                                                                 dlf2, &    !dq/dt due to export of cloud water into environment by shallow convection(kg/kg/s)
                                                                t_phy, &    !Temprature at the mid points (K)
-															t_phy_pg, &
+			  				     t_phy_pg,&
                                                                p_hyd, &    !Hydrostatic pressure(Pa)
                                                              p8w_hyd, &    !Hydrostatic Pressure at level interface (Pa)
                                                               z_at_w, &    !Height above sea level at layer interfaces (m) 
@@ -458,7 +480,7 @@ REAL, DIMENSION( ims:ime, kms:kme, jms:jme ),                        &
    REAL , DIMENSION( ims:ime , jms:jme ) , INTENT(IN), OPTIONAL   :: SNOWH
 
    REAL , DIMENSION( ims:ime , jms:jme ) , INTENT(OUT)   :: SR
-   REAL , DIMENSION( ims:ime , jms:jme ) , INTENT(OUT), OPTIONAL :: SR_PG
+   REAL , DIMENSION( ims:ime , jms:jme ) , INTENT(OUT), OPTIONAL  :: SR_PG
 
    REAL, INTENT(IN   ) :: dt,dx,dy
 
@@ -566,7 +588,6 @@ REAL, DIMENSION( ims:ime, kms:kme, jms:jme ),                        &
                                                         ,HAILNCPG &
                                                        ,HAILNCVPG		 
 ! <<<< PG precipitation														 
-
    INTEGER,OPTIONAL,INTENT(IN   )    ::                        id
 
    REAL , DIMENSION( ims:ime , jms:jme ) , OPTIONAL ,             &
@@ -593,7 +614,7 @@ REAL, DIMENSION( ims:ime, kms:kme, jms:jme ),                        &
                        ,fx_pg_qnic,fx_pg_qnip,fx_pg_qnid,fx_pg_qt                                  &
 !                       ,f_pg_qzr,f_pg_qzi,f_pg_qzs,f_pg_qzg,f_pg_qzh                              &
 		       ,fx_pg_qvolg,fx_pg_qvolh 		        &
-                       ,fx_pg_qnwfa, fx_pg_qnifa                         ! Added by G. Thompson
+                       ,fx_pg_qnwfa, fx_pg_qnifa                    ! Added by G. Thompson
 
 ! >>>>> PG variables
 
@@ -608,6 +629,24 @@ REAL, DIMENSION( ims:ime, kms:kme, jms:jme ),                        &
    INTEGER, INTENT(IN):: has_reqc, has_reqi, has_reqs
 !  REAL , DIMENSION( ims:ime , jms:jme ), OPTIONAL, INTENT(INOUT) :: lwp
 
+   INTEGER, INTENT(IN) :: n_moist, n_scalar  
+   REAL, DIMENSION( ims:ime, kms:kme, jms:jme), OPTIONAL, INTENT(INOUT) ::  &
+                  t_old,ssw,ssi
+   REAL, DIMENSION( ims:ime, kms:kme, jms:jme), OPTIONAL, INTENT(INOUT) ::  &
+                  t_old_pg,ssw_pg,ssi_pg				  
+   REAL, DIMENSION( ims:ime, kms:kme, jms:jme, n_moist ),       &
+         OPTIONAL, INTENT(INOUT ) :: moist_old, moist
+   REAL, DIMENSION( ims:ime, kms:kme, jms:jme, n_scalar ),       &
+         OPTIONAL, INTENT(INOUT ) :: scalar_old , scalar
+
+   REAL, DIMENSION( ims:ime, kms:kme, jms:jme),       &
+         OPTIONAL, INTENT(INOUT ) ::  DNW_ACTV,DNW_COAG,DNW_BRUP,DNI_COLL,DMW_DIFF      &  ! for mp_detailed
+                                     ,DMW_MELT,DMI_DIFF,DMWI_MELT,DMWI_DIFF,DMW_RIME    &  ! for mp_detailed
+                                     ,DMW_FREZ,DMG_RIME
+   REAL, DIMENSION( ims:ime, kms:kme, jms:jme),       &
+         OPTIONAL, INTENT(INOUT ) ::  DNW_ACTV_PG,DNW_COAG_PG,DNW_BRUP_PG,DNI_COLL_PG,DMW_DIFF_PG      &  ! for mp_detailed
+                                     ,DMW_MELT_PG,DMI_DIFF_PG,DMWI_MELT_PG,DMWI_DIFF_PG,DMW_RIME_PG    &  ! for mp_detailed
+                                     ,DMW_FREZ_PG,DMG_RIME_PG
 
 ! LOCAL  VAR
 
@@ -903,6 +942,25 @@ REAL, DIMENSION( ims:ime, kms:kme, jms:jme ),                        &
                 CALL wrf_error_fatal ( 'arguments not present for calling thompson_et_al' )
              ENDIF
 
+        CASE (DETAILED)
+             CALL wrf_debug ( 100 , 'microphysics_driver: calling geresdi detailed/bin model' )
+             CALL mp_gi_driver(                          &
+                     itimestep,th,pi_phy,p,dt,dz8w,rho,  &
+                     t_old,dx,dy,                        &
+                     moist_old, moist,                   &
+                     scalar_old, scalar,                 &
+                     n_moist, n_scalar,ssw,ssi,          &
+                     DNW_ACTV,DNW_COAG,DNW_BRUP,DNI_COLL,&
+                     DMW_DIFF,DMW_MELT,DMI_DIFF,DMWI_MELT,&
+                     DMWI_DIFF,DMW_RIME,DMW_FREZ,DMG_RIME,&
+                     RAINNC, RAINNCV,                    &
+                     snownc, snowncv,                    &
+                     graupelnc, graupelncv,              &
+                     sr,refl_10cm, diagflag,do_radar_ref,&
+                     ids,ide, jds,jde, kds,kde,          &
+                     ims,ime, jms,jme, kms,kme,          &
+                     its,ite, jts,jte, kts,kte)
+
 #if (EM_CORE==1)
        CASE (FAST_KHAIN_LYNN)
              CALL wrf_debug ( 100 , 'microphysics_driver: calling sbm' )
@@ -996,6 +1054,7 @@ REAL, DIMENSION( ims:ime, kms:kme, jms:jme ),                        &
 
 !
     CASE (MORR_TWO_MOMENT)
+
          CALL wrf_debug(100, 'microphysics_driver: calling morrison two moment')
          IF (PRESENT (QV_CURR) .AND. PRESENT (QC_CURR) .AND. &
              PRESENT (QR_CURR) .AND. PRESENT (QI_CURR) .AND. &
@@ -2042,8 +2101,7 @@ REAL, DIMENSION( ims:ime, kms:kme, jms:jme ),                        &
              ELSE
                 CALL wrf_error_fatal ( 'arguments not present for calling thompson_et_al aero piggybacking' )
              ENDIF
-
-!
+			 
         CASE (THOMPSON_PG)
              CALL wrf_debug ( 100 , 'microphysics_driver: calling thompson piggybacking' )
              IF ( PRESENT( QV_PG_CURR ) .AND. PRESENT ( QC_PG_CURR ) .AND.  &
@@ -2081,7 +2139,7 @@ REAL, DIMENSION( ims:ime, kms:kme, jms:jme ),                        &
                      SNOWNCV=SNOWNCVPG,                    &
                      GRAUPELNC=GRAUPELNCPG,                &
                      GRAUPELNCV=GRAUPELNCVPG,              &
-                     SR=sr,                              &
+                     SR=sr_pg,                              &
 #if ( WRF_CHEM == 1 )
                      RAINPROD=rainprod,                  &
                      EVAPPROD=evapprod,                  &
@@ -2101,6 +2159,24 @@ REAL, DIMENSION( ims:ime, kms:kme, jms:jme ),                        &
              ELSE
                 CALL wrf_error_fatal ( 'arguments not present for calling thompson_et_al piggybacking' )
              ENDIF
+
+        CASE (DETAILED_PG)
+             CALL wrf_debug ( 100 , 'microphysics_driver: calling geresdi detailed/bin model piggybacking' )
+             CALL mp_gi_pg_driver(                          &
+                     itimestep,th_pg,pi_phy,p,dt,dz8w,rho,  &
+                     t_old_pg,dx,dy,                        &
+                     scalar_old, scalar,                 &
+                     n_scalar,ssw_pg,ssi_pg,          &
+                     DNW_ACTV_PG,DNW_COAG_PG,DNW_BRUP_PG,DNI_COLL_PG,&
+                     DMW_DIFF_PG,DMW_MELT_PG,DMI_DIFF_PG,DMWI_MELT_PG,&
+                     DMWI_DIFF_PG,DMW_RIME_PG,DMW_FREZ_PG,DMG_RIME_PG,&
+                     RAINNCPG, RAINNCVPG,                    &
+                     snowncpg, snowncvpg,                    &
+                     graupelncpg, graupelncvpg,              &
+                     sr_pg,refl_10cm_pg,diagflag,do_radar_ref,&
+                     ids,ide, jds,jde, kds,kde,          &
+                     ims,ime, jms,jme, kms,kme,          &
+                     its,ite, jts,jte, kts,kte)
 
 #if (EM_CORE==1)
 !       CASE (FAST_KHAIN_LYNN_PG)

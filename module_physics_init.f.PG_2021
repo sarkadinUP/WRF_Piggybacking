@@ -19,7 +19,6 @@ MODULE module_physics_init
    LOGICAL  :: CAM_INITIALIZED = .FALSE.
    LOGICAL  :: WINDFARM_INITIALIZED = .FALSE.
 
-
 CONTAINS
 
 
@@ -93,7 +92,7 @@ CONTAINS
                          cugd_tten,cugd_ttens,cugd_qvten,        &    ! Optional
                          cugd_qvtens,cugd_qcten,                 &    ! Optional
                          ISNOWXY, ZSNSOXY, TSNOXY,                        & ! Optional Noah-MP
-                         SNICEXY, SNLIQXY, TVXY, TGXY, CANICEXY,          & ! Optional Noah0-MP
+                         SNICEXY, SNLIQXY, TVXY, TGXY, CANICEXY,          & ! Optional Noah-MP
                          CANLIQXY, EAHXY, TAHXY, CMXY,                    & ! Optional Noah-MP
                          CHXY, FWETXY, SNEQVOXY, ALBOLDXY, QSNOWXY,       & ! Optional Noah-MP
                          WSLAKEXY, ZWTXY, WAXY, WTXY, LFMASSXY, RTMASSXY, & ! Optional Noah-MP
@@ -217,11 +216,6 @@ CONTAINS
                          ,G_URB2D_mosaic,RN_URB2D_mosaic                                                      & ! danli mosaic 
                          ,TS_URB2D_mosaic                                                                     & ! danli mosaic 
                          ,TS_RUL2D_mosaic                                                                     & ! danli mosaic
-!... Piggybacking OPTIONAL variables added by SN
-                         ,RTHBLTENPG               &
-                         ,RQVBLTENPG,RQCBLTENPG,RQIBLTENPG             &
-                         ,RTHRATENPG,RTHRATENLWPG,RTHRATENSWPG         &
-						 ,CLDFRA_PG, HFX_PG, QFX_PG
                          )
 
 !-----------------------------------------------------------------
@@ -326,8 +320,6 @@ CONTAINS
 
    REAL,     DIMENSION( ims:ime , kms:kme , jms:jme ) , INTENT(INOUT) ::    &!BSINGH(PNNL)- should be declared inout
              RTHRATEN, RTHRATENLW, RTHRATENSW, CLDFRA
-   REAL,     DIMENSION( ims:ime , kms:kme , jms:jme ) , OPTIONAL, INTENT(INOUT) ::    &!BSINGH(PNNL)- should be declared inout
-             RTHRATENPG, RTHRATENLWPG, RTHRATENSWPG, CLDFRA_PG
 
    REAL,     DIMENSION( ims:ime , kms:kme , jms:jme ) , OPTIONAL, INTENT(INOUT) :: &!BSINGH(PNNL)- should be declared inout
              CLDFRA_OLD
@@ -393,9 +385,6 @@ CONTAINS
 
   REAL,     DIMENSION( ims:ime , kms:kme , jms:jme ) , INTENT(INOUT) ::    & !BSINGH(PNNL)- should be declared inout
              RUBLTEN,RVBLTEN,RTHBLTEN,RQVBLTEN,RQCBLTEN,RQIBLTEN,EXCH_H,TKE_PBL
-  REAL,     DIMENSION( ims:ime , kms:kme , jms:jme ) , OPTIONAL, INTENT(INOUT) ::    & !BSINGH(PNNL)- should be declared inout
-             RTHBLTENPG,RQVBLTENPG,RQCBLTENPG,RQIBLTENPG
-
   REAL,     DIMENSION( ims:ime , kms:kme , jms:jme ) , INTENT(INOUT), OPTIONAL :: QKE
 
   REAL,     DIMENSION( ims:ime , kms:kme , jms:jme ) , INTENT(OUT), OPTIONAL :: &
@@ -410,9 +399,7 @@ CONTAINS
              cugd_qvtens,cugd_qcten
    REAL,     DIMENSION( ims:ime , jms:jme ) , INTENT(INOUT) ::         &
              XLAND,ZNT,Z0,UST,MOL,LU_INDEX,                         &
-             PBLH,THC,MAVAIL,HFX,HFX_PG,QFX,QFX_PG,RAINBL
-   REAL,     DIMENSION( ims:ime , jms:jme ) , INTENT(INOUT), OPTIONAL ::         &
-             HFX_PG,QFX_PG			 
+             PBLH,THC,MAVAIL,HFX,QFX,RAINBL
    INTEGER , INTENT(INOUT)  :: landuse_ISICE, landuse_LUCATS
    INTEGER , INTENT(INOUT)  :: landuse_LUSEAS, landuse_ISN
    REAL    , INTENT(INOUT)  , DIMENSION( : ) :: lu_state
@@ -860,9 +847,7 @@ integer myproc
       MOL(i,j)=0.0
       PBLH(i,j)=0.0
       HFX(i,j)=0.
-      HFX_PG(i,j) = 0.
       QFX(i,j)=0.
-      QFX(i,j) = 0.
       RAINBL(i,j)=0.
       RAINNCV(i,j)=0.
       SNOWNCV(i,j)=0.
@@ -1057,8 +1042,7 @@ integer myproc
    CALL wrf_debug ( 200 , 'module_start: phy_init: Before call to ra_init' )
 
    CALL ra_init(id=id,STEPRA=STEPRA,RADT=RADT,DT=DT,RTHRATEN=RTHRATEN,RTHRATENLW=RTHRATENLW,             &
-                RTHRATENSW=RTHRATENSW,CLDFRA=CLDFRA,                                                     &
-                EMISS=EMISS,cen_lat=cen_lat,JULYR=JULYR,JULDAY=JULDAY,GMT=GMT,    &
+                RTHRATENSW=RTHRATENSW,CLDFRA=CLDFRA,EMISS=EMISS,cen_lat=cen_lat,JULYR=JULYR,JULDAY=JULDAY,GMT=GMT,    &
                 levsiz=levsiz,XLAT=XLAT,XLONG=XLONG,n_ozmixm=n_ozmixm,     &
                 alevsiz=alevsiz,no_src_types=no_src_types,                 &
                 cldfra_dp=cldfra_dp,cldfra_sh=cldfra_sh,                   & ! optional for subgrid cloud by ckay
@@ -1072,14 +1056,11 @@ integer myproc
                 allowed_to_read=allowed_to_read, start_of_simulation=start_of_simulation,           &
                 ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,                   &
                 ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,                   &
-                its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,                   &
-				RTHRATENPG=RTHRATENPG,RTHRATENLW_PG=RTHRATENLWPG,             &
-                RTHRATENSW_PG=RTHRATENSWPG,CLDFRA_PG=CLDFRA_PG				)
+                its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte                    )
 
    CALL wrf_debug ( 200 , 'module_start: phy_init: Before call to bl_init' )
    CALL bl_init(STEPBL,BLDT,DT,RUBLTEN,RVBLTEN,RTHBLTEN,        &
-                RQVBLTEN,RQCBLTEN,RQIBLTEN,                     &
-                TSK,TMN,             &
+                RQVBLTEN,RQCBLTEN,RQIBLTEN,TSK,TMN,             &
                 config_flags,restart,UST,LOWLYR,TSLB,ZS,DZS,    &
                 num_soil_layers,TKE_PBL,mfshconv,               &
                 massflux_EDKF, entr_EDKF, detr_EDKF, & 
@@ -1212,9 +1193,7 @@ integer myproc
                 ,G_URB2D_mosaic,RN_URB2D_mosaic                 &  !danli mosaic 
                 ,TS_URB2D_mosaic                                &  !danli mosaic 
                 ,TS_RUL2D_mosaic                                &  !danli mosaic 
-! Optional Piggybacking variables added by SN
-                ,RTHBLTENPG        &
-                ,RQVBLTENPG,RQCBLTENPG,RQIBLTENPG             ) 
+               ) 
 
    CALL wrf_debug ( 200 , 'module_start: phy_init: Before call to cu_init' )
 
@@ -1627,8 +1606,7 @@ integer myproc
 
 !=====================================================================
    SUBROUTINE ra_init(id,STEPRA,RADT,DT,RTHRATEN,RTHRATENLW,       &
-                      RTHRATENSW,CLDFRA,  &
-                      EMISS,cen_lat,JULYR,JULDAY,GMT,    &
+                      RTHRATENSW,CLDFRA,EMISS,cen_lat,JULYR,JULDAY,GMT,    &
                       levsiz,XLAT,XLONG,n_ozmixm,                     &
                       alevsiz,no_src_types,                           &
                       cldfra_dp,cldfra_sh,                            & ! Optional for subgrid cloud by ckay
@@ -1642,8 +1620,7 @@ integer myproc
                       allowed_to_read, start_of_simulation,          &
                       ids, ide, jds, jde, kds, kde,                  &
                       ims, ime, jms, jme, kms, kme,                  &
-                      its, ite, jts, jte, kts, kte,                  &
-					  RTHRATENPG,RTHRATENLW_PG,RTHRATENSW_PG,CLDFRA_PG)
+                      its, ite, jts, jte, kts, kte                   )
 !---------------------------------------------------------------------
    USE module_ra_rrtm      , ONLY : rrtminit
    USE module_ra_rrtmg_lw  , ONLY : rrtmg_lwinit
@@ -1705,12 +1682,6 @@ integer myproc
                                                          RTHRATENLW, &
                                                          RTHRATENSW, &
                                                              CLDFRA
-   REAL , DIMENSION( ims:ime , kms:kme , jms:jme ) , INTENT(INOUT), OPTIONAL ::           &!BSINGH(PNNL)- should be declared inout
-                                                           RTHRATENPG, &
-                                                         RTHRATENLW_PG, &
-                                                         RTHRATENSW_PG, &
-                                                             CLDFRA_PG
-
 
    REAL , DIMENSION( ims:ime , kms:kme , jms:jme ) , INTENT(INOUT) , & ! ckay for subgrid cloud
                                                          OPTIONAL :: &
@@ -1752,10 +1723,6 @@ integer myproc
         RTHRATENLW(i,k,j)=0.
         RTHRATENSW(i,k,j)=0.
         CLDFRA(i,k,j)=0.
-        RTHRATENPG(i,k,j)=0.
-        RTHRATENLW_PG(i,k,j)=0.
-        RTHRATENSW_PG(i,k,j)=0.
-        CLDFRA_PG(i,k,j)=0.
      ENDDO
      ENDDO
      ENDDO
@@ -1997,8 +1964,7 @@ integer myproc
    END SUBROUTINE ra_init
 
    SUBROUTINE bl_init(STEPBL,BLDT,DT,RUBLTEN,RVBLTEN,RTHBLTEN,  &
-                RQVBLTEN,RQCBLTEN,RQIBLTEN,                     &
-                TSK,TMN,             &
+                RQVBLTEN,RQCBLTEN,RQIBLTEN,TSK,TMN,             &
                 config_flags,restart,UST,LOWLYR,TSLB,ZS,DZS,    &
                 num_soil_layers,TKE_PBL,mfshconv,               &
                 massflux_EDKF, entr_EDKF, detr_EDKF, & 
@@ -2129,7 +2095,7 @@ integer myproc
                 ,G_URB2D_mosaic,RN_URB2D_mosaic                 &  !danli mosaic 
                 ,TS_URB2D_mosaic                                &  !danli mosaic 
                 ,TS_RUL2D_mosaic                                &  !danli mosaic  
-                ,RTHBLTENPG,RQVBLTENPG,RQCBLTENPG,RQIBLTENPG  ) !Optional oml
+                                                                ) !Optional oml
 !--------------------------------------------------------------------
    USE module_sf_sfclay
    USE module_sf_sfclayrev
@@ -2246,12 +2212,6 @@ integer myproc
                                                           RQCBLTEN, &
                                                           RQIBLTEN, &
                                                           TKE_PBL
-   REAL,     DIMENSION( ims:ime , kms:kme , jms:jme ) , INTENT(INOUT), OPTIONAL ::       &!BSINGH(PNNL)- should be declared inout
-                                                          RTHBLTENPG, &
-                                                          RQVBLTENPG, &
-                                                          RQCBLTENPG, &
-                                                          RQIBLTENPG
-
    REAL,     DIMENSION( ims:ime , kms:kme , jms:jme ) , INTENT(INOUT), OPTIONAL :: QKE
 
    REAL,     DIMENSION( ims:ime , kms:kme , jms:jme ) , INTENT(OUT), OPTIONAL :: &
@@ -2948,15 +2908,14 @@ CALL lsm_mosaic_init(IVGTYP,config_flags%ISWATER,config_flags%ISURBAN,config_fla
             ( 'module_physics_init: Use sf_sfclay_physics= 1 or 91 for this pbl option' )
            IF ((SF_URBAN_PHYSICS.eq.2).OR.(SF_URBAN_PHYSICS.EQ.3)) CALL wrf_error_fatal &
             ( 'module_physics_init: use myj (option 2) or boulac (option 8) with BEP/BEM urban scheme' )
-           CALL ysuinit(RUBLTEN,RVBLTEN,RTHBLTEN, RQVBLTEN,   &
-                        RQCBLTEN,RQIBLTEN, P_QI,              &
+           CALL ysuinit(RUBLTEN,RVBLTEN,RTHBLTEN,RQVBLTEN,    &
+                        RQCBLTEN,RQIBLTEN,P_QI,               &
                         PARAM_FIRST_SCALAR,                   &
                         restart,                              &
                         allowed_to_read ,                     &
                         ids, ide, jds, jde, kds, kde,         &
                         ims, ime, jms, jme, kms, kme,         &
                         its, ite, jts, jte, kts, kte          )
-
       CASE (SHINHONGSCHEME)
            if(isfc .ne. 1)CALL wrf_error_fatal &
             ( 'module_physics_init: Use sf_sfclay_physics= 1 or 91 for this pbl option' )
@@ -3563,6 +3522,7 @@ CALL lsm_mosaic_init(IVGTYP,config_flags%ISWATER,config_flags%ISURBAN,config_fla
    USE module_mp_HWRF
 #endif
    USE module_mp_thompson
+   USE module_mp_detailed
    USE module_mp_full_sbm
    USE module_mp_fast_sbm
    USE module_mp_morr_two_moment
@@ -3639,7 +3599,7 @@ CALL lsm_mosaic_init(IVGTYP,config_flags%ISWATER,config_flags%ISURBAN,config_fla
      nssl_params(10) = nssl_rho_qs
    ENDIF
 
-   CALL wrf_debug ( 150 , 'initialize driver microphysics' )
+   CALL wrf_debug ( 200 , 'initialize driver microphysics' )
 
    mp_select: SELECT CASE(config_flags%mp_physics)
 
@@ -3689,7 +3649,8 @@ CALL lsm_mosaic_init(IVGTYP,config_flags%ISWATER,config_flags%ISURBAN,config_fla
                           IDS=ids, IDE=ide, JDS=jds, JDE=jde, KDS=kds, KDE=kde,   &
                           IMS=ims, IME=ime, JMS=jms, JME=jme, KMS=kms, KME=kme,   &
                           ITS=its, ITE=ite, JTS=jts, JTE=jte, KTS=kts, KTE=kte)
-
+     CASE (DETAILED)
+         IF(start_of_simulation.or.restart.or.config_flags%cycling)CALL geresdi_init
      CASE (MORR_TWO_MOMENT)
          CALL morr_two_moment_init( config_flags%hail_opt )
      CASE (MILBRANDT2MOM)
@@ -3738,7 +3699,7 @@ CALL lsm_mosaic_init(IVGTYP,config_flags%ISWATER,config_flags%ISURBAN,config_fla
 !! Due to the piggybacking microphysics do not related to the driver scheme
 !! the selection is the same, and based on the original, added by SN, 2018
 
-   IF (config_flags%mp_physics_pg.ne.0) THEN
+   IF (config_flags%diag_mp_pg_init == 1) THEN
    CALL wrf_debug ( 150 , 'initialize piggyback microphysics' )
 
    mp_pg_select: SELECT CASE(config_flags%mp_physics_pg)
@@ -3789,7 +3750,8 @@ CALL lsm_mosaic_init(IVGTYP,config_flags%ISWATER,config_flags%ISURBAN,config_fla
                           IDS=ids, IDE=ide, JDS=jds, JDE=jde, KDS=kds, KDE=kde,   &
                           IMS=ims, IME=ime, JMS=jms, JME=jme, KMS=kms, KME=kme,   &
                           ITS=its, ITE=ite, JTS=jts, JTE=jte, KTS=kts, KTE=kte)
-
+     CASE (DETAILED_PG)
+         IF(start_of_simulation.or.restart.or.config_flags%cycling)CALL geresdi_init
      CASE (MORR_TWO_MOMENT_PG)
          CALL morr_two_moment_init( config_flags%hail_opt )
      CASE (MILBRANDT2MOM_PG)

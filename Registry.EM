@@ -17,6 +17,7 @@ include registry.afwa
 include registry.sbm
 include registry.bdy_perturb
 include registry.piggybacking
+include registry.UPNB
 
 
 # added to output 5 for ESMF
