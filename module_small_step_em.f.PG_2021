@@ -316,7 +316,7 @@ SUBROUTINE small_step_finish( u_2, u_1, v_2, v_1, w_2, w_1,    &
                               ims,ime, jms,jme, kms,kme,       &
                               its,ite, jts,jte, kts,kte,       &
 !... Piggybacking variables added by SN OPTIONAL          
-							  t_pg_2,t_pg_1,t_save_pg,h_diabatic_pg)							  )
+			  t_pg_2,t_pg_1,t_save_pg,h_diabatic_pg)							  
 
 
   IMPLICIT NONE  ! religion first
@@ -1091,7 +1091,7 @@ SUBROUTINE advance_mu_t( ww, ww_1, u, u_1, v, v_1,            &
                          ims, ime, jms, jme, kms, kme,        &
                          its, ite, jts, jte, kts, kte,        &
 !... Piggybacking variables added by SN OPTIONAL          
-					     t_pg,t_pg_1,t_ave_pg,ft_pg)						 )
+ 		     t_pg,t_pg_1,t_ave_pg,ft_pg)						
 
   IMPLICIT NONE  ! religion first
 

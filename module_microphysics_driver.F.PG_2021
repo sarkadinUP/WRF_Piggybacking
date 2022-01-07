@@ -69,12 +69,6 @@ SUBROUTINE microphysics_driver(				 &
 		    ! ,f_qzr, f_qzi, f_qzs, f_qzg, f_qzh                  &
 	             ,qvolg_curr, qvolh_curr				 &
 		     ,fx_qvolg, fx_qvolh				 &
-                     ,qa1_curr, qa1c_curr, qa1r_curr, qa1i_curr          &
-		     ,fx_qa1, fx_qa1c, fx_qa1r, fx_qa1i                  &
-		     ,qa1s_curr, qa1g_curr, qna1_curr, qna1c_curr        &
-		     ,fx_qa1s, fx_qa1g, fx_qna1, fx_qna1c                &
-		     ,qna1r_curr, qna1i_curr, qna1s_curr, qna1g_curr     &
-		     ,fx_qna1r, fx_qna1i, fx_qna1s, fx_qna1g             &
 		     ,qrcuten_pg, qscuten_pg, qicuten_pg                 &  ! MORR_TWO_MOMENT TEST PIGGYBACK, 2018. 06. 29. Added by SN
 		     ,qrcuten, qscuten, qicuten, mu, hail, ice2          &
                     ! , ccntype			     	   		  &
@@ -104,12 +98,6 @@ SUBROUTINE microphysics_driver(				 &
 		! ,f_pg_qzr, f_pg_qzi, f_pg_qzs, f_pg_qzg, f_pg_qzh                  &
 	         ,qvolg_pg_curr, qvolh_pg_curr					 &
 		 ,fx_pg_qvolg, fx_pg_qvolh				         &
-                 ,qa1_pg_curr, qa1c_pg_curr, qa1r_pg_curr, qa1i_pg_curr          &
-		 ,fx_pg_qa1, fx_pg_qa1c, fx_pg_qa1r, fx_pg_qa1i                  &
-		 ,qa1s_pg_curr, qa1g_pg_curr, qna1_pg_curr, qna1c_pg_curr        &
-		 ,fx_pg_qa1s, fx_pg_qa1g, fx_pg_qna1, fx_pg_qna1c                &
-		 ,qna1r_pg_curr, qna1i_pg_curr, qna1s_pg_curr, qna1g_pg_curr     &
-		 ,fx_pg_qna1r, fx_pg_qna1i, fx_pg_qna1s, fx_pg_qna1g             &				 
 ! <<< Piggybacking					 
 									)
 
@@ -135,13 +123,13 @@ SUBROUTINE microphysics_driver(				 &
                     ,GSFCGCESCHEME, WDM5SCHEME, WDM6SCHEME, NSSL_2MOM, NSSL_2MOMCCN, NSSL_2MOMG  &
                     ,NSSL_1MOM,NSSL_1MOMLFO & ! ,NSSL_3MOM       &
                     ,MILBRANDT2MOM , CAMMGMPSCHEME,FULL_KHAIN_LYNN & !,MILBRANDT3MOM
-                    ,DETAILED
+                    ,DETAILED   &
 ! >>> PG microphysics schemes
                     ,KESSLERSCHEME_PG, LINSCHEME_PG, SBU_YLINSCHEME_PG, WSM3SCHEME_PG, WSM5SCHEME_PG    &
                     ,WSM6SCHEME_PG, ETAMPNEW_PG, ETAMP_HR_PG, THOMPSON_PG, THOMPSONAERO_PG, MORR_TWO_MOMENT_PG     &  !FAST_KHAIN_LYNN_PG
                     ,GSFCGCESCHEME_PG, WDM5SCHEME_PG, WDM6SCHEME_PG, NSSL_2MOM_PG, NSSL_2MOMCCN_PG, NSSL_2MOMG_PG  &
                     ,NSSL_1MOM_PG,NSSL_1MOMLFO_PG & ! ,NSSL_3MOM_PG       &
-                    ,MILBRANDT2MOM_PG , CAMMGMPSCHEME_PG & !,MILBRANDT3MOM_PG, FULL_KHAIN_LYNN_PG
+                    ,MILBRANDT2MOM_PG , CAMMGMPSCHEME_PG  !,MILBRANDT3MOM_PG, FULL_KHAIN_LYNN_PG
 ! >>> PG microphysics schemes
 
 #endif

@@ -660,9 +660,9 @@ IF (grid%sppt_on==1) then
                        ids, ide, jds, jde, kds, kde,                &
                        ims, ime, jms, jme, kms, kme,                &
                        its, ite, jts, jte, kts, kte,                &
-                       kte_stoch,kme_stoch,
+                       kte_stoch,kme_stoch,                         &
 !... Piggybacking variables added by SN OPTIONAL          
-					   t_tendf_pg,rt_tendf_stoch_pg				   )
+		       t_tendf_pg,rt_tendf_stoch_pg	)
 
        IMPLICIT NONE
        INTEGER , INTENT(IN)        ::  ids, ide, jds, jde, kds, kde,   &
@@ -725,9 +725,9 @@ IF (grid%sppt_on==1) then
                        ids, ide, jds, jde, kds, kde,                    &
                        ims, ime, jms, jme, kms, kme,                    &
                        its, ite, jts, jte, kts, kte,                    & 
-                       kte_stoch,kme_stoch,								&
+                       kte_stoch,kme_stoch,				&
 !... Piggybacking variables added by SN OPTIONAL          
-					   t_tendf_pg  								   )					   
+		       t_tendf_pg )					   
 
 !      This subroutine add stochastic perturbations of the form 
 !

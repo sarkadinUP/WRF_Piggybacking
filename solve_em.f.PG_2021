@@ -485,7 +485,6 @@ SUBROUTINE solve_em ( grid , config_flags  &
                           grid%v_btxs,grid%v_btxe,grid%v_btys,grid%v_btye,     &
                           grid%ph_btxs,grid%ph_btxe,grid%ph_btys,grid%ph_btye, &
                           grid%t_btxs,grid%t_btxe,grid%t_btys,grid%t_btye,     &
-                          grid%t_pg_btxs,grid%t_pg_btxe,grid%t_pg_btys,grid%t_pg_btye,     &
                           grid%w_btxs,grid%w_btxe,grid%w_btys,grid%w_btye,     &
                           grid%mu_btxs,grid%mu_btxe,grid%mu_btys,grid%mu_btye, &
                           moist_btxs,moist_btxe,                               &
@@ -498,7 +497,9 @@ SUBROUTINE solve_em ( grid , config_flags  &
                           ips,ipe, jps,jpe, kps,kpe,                   &
                           grid%i_start(ij), grid%i_end(ij),            &
                           grid%j_start(ij), grid%j_end(ij),            &
-                          k_start, k_end                               )
+                          k_start, k_end,                              &
+                          grid%t_pg_btxs,grid%t_pg_btxe,grid%t_pg_btys,grid%t_pg_btye     &
+                               )
 
        ENDIF
      ENDDO
@@ -610,7 +611,7 @@ BENCH_START(step_prep_tim)
      DO ij = 1 , grid%num_tiles
 
        CALL rk_step_prep  ( config_flags, rk_step,            &
-                            grid%u_2, grid%v_2, grid%w_2, grid%t_2,grid%t_pg_2, grid%ph_2, grid%mu_2,   &
+                            grid%u_2, grid%v_2, grid%w_2, grid%t_2, grid%ph_2, grid%mu_2,   &
                             moist,                            &
                             grid%ru, grid%rv, grid%rw, grid%ww, grid%php, grid%alt, grid%muu, grid%muv,   &
                             grid%mub, grid%mut, grid%phb, grid%pb, grid%p, grid%al, grid%alb,    &
@@ -623,7 +624,8 @@ BENCH_START(step_prep_tim)
                             ims, ime, jms, jme, kms, kme,     &
                             grid%i_start(ij), grid%i_end(ij), &
                             grid%j_start(ij), grid%j_end(ij), &
-                            k_start, k_end                   )
+                            k_start, k_end,                   &
+                            grid%t_pg_2)
 
      END DO
      !$OMP END PARALLEL DO
@@ -758,16 +760,16 @@ BENCH_END(set_phys_bc_tim)
                              , fdda3d, fdda2d                   &
                              , aerod                            &
                              , ru_tendf, rv_tendf               &
-                             , rw_tendf, t_tendf,t_tendf_pg     &
+                             , rw_tendf, t_tendf                &
                              , ph_tendf, mu_tendf               &
-                             , tke_tend, tke_tend_pg            &
+                             , tke_tend                         &
                              , config_flags%use_adaptive_time_step &
                              , curr_secs                        &
                              , psim , psih , wspd , gz1oz0      &
                              , br , chklowq                     &
-                             , cu_act_flag , hol , th_phy, th_phy_pg       &
-                             , pi_phy , p_phy , grid%t_phy, grid%t_phy_pg      &
-                             , dz8w , p8w , t8w, t8w_pg         &
+                             , cu_act_flag , hol , th_phy       &
+                             , pi_phy , p_phy , grid%t_phy      &
+                             , dz8w , p8w , t8w                 &
                              , ids, ide, jds, jde, kds, kde     &
                              , ims, ime, jms, jme, kms, kme     &
                              , ips, ipe, jps, jpe, kps, kpe     &
@@ -777,7 +779,7 @@ BENCH_END(set_phys_bc_tim)
                              , ipsy, ipey, jpsy, jpey, kpsy, kpey    &
                              , k_start , k_end                  &
                              , f_flux                           &
-                            )
+                             , t_tendf_pg,th_phy_pg,grid%t_phy_pg,t8w_pg)
 
 #ifdef DM_PARALLEL
        IF ( config_flags%bl_pbl_physics == MYNNPBLSCHEME2 .OR. &
@@ -793,15 +795,15 @@ BENCH_END(set_phys_bc_tim)
                              , scalar , scalar_tend             &
                              , fdda3d, fdda2d                   &
                              , ru_tendf, rv_tendf               &
-                             , rw_tendf, t_tendf, t_tendf_pg    &
+                             , rw_tendf, t_tendf                &
                              , ph_tendf, mu_tendf               &
-                             , tke_tend,tke_tend_pg             &
+                             , tke_tend                         &
                              , adapt_step_flag , curr_secs      &
                              , psim , psih , wspd , gz1oz0      &
                              , br , chklowq                     &
-                             , cu_act_flag , hol , th_phy, th_phy_pg    &
-                             , pi_phy , p_phy , grid%t_phy, grid%t_phy_pg   &
-                             , dz8w , p8w , t8w, t8w_pg         &
+                             , cu_act_flag , hol , th_phy       &
+                             , pi_phy , p_phy , grid%t_phy      &
+                             , dz8w , p8w , t8w                 &
                              , nba_mij, num_nba_mij             & !JDM 
                              , nba_rij, num_nba_rij             & !JDM  
                              , ids, ide, jds, jde, kds, kde     &
@@ -812,7 +814,7 @@ BENCH_END(set_phys_bc_tim)
                              , imsy, imey, jmsy, jmey, kmsy, kmey    &
                              , ipsy, ipey, jpsy, jpey, kpsy, kpey    &
                              , k_start , k_end                  &
-                            )
+                             , t_tendf_pg, th_phy_pg, grid%t_phy_pg,t8w_pg)
 
      END IF rk_step_is_one
 
@@ -928,17 +930,17 @@ BENCH_START(rk_tend_tim)
 
        CALL wrf_debug ( 200 , ' call rk_tendency' )
        CALL rk_tendency ( config_flags, rk_step                                                                &
-                         ,grid%ru_tend, grid%rv_tend, rw_tend, ph_tend, t_tend, t_tend_pg                      &
-                         ,ru_tendf, rv_tendf, rw_tendf, ph_tendf, t_tendf, t_tendf_pg                          &
+                         ,grid%ru_tend, grid%rv_tend, rw_tend, ph_tend, t_tend                                 &
+                         ,ru_tendf, rv_tendf, rw_tendf, ph_tendf, t_tendf                                      &
                          ,mu_tend, grid%u_save, grid%v_save, w_save, ph_save                                   &
-                         ,grid%t_save, grid%t_save_pg,mu_save, grid%rthften, grid%rthftenpg                    &
+                         ,grid%t_save, mu_save, grid%rthften                                                   &
                          ,grid%ru, grid%rv, grid%rw, grid%ww                                                   &
-                         ,grid%u_2, grid%v_2, grid%w_2, grid%t_2, grid%t_pg_2, grid%ph_2                       &
-                         ,grid%u_1, grid%v_1, grid%w_1, grid%t_1, grid%t_pg_1, grid%ph_1                       &
-                         ,grid%h_diabatic, grid%h_diabatic_pg, grid%phb, grid%t_init,grid%t_init_pg            &
+                         ,grid%u_2, grid%v_2, grid%w_2, grid%t_2,  grid%ph_2                       &
+                         ,grid%u_1, grid%v_1, grid%w_1, grid%t_1,  grid%ph_1                       &
+                         ,grid%h_diabatic, grid%phb, grid%t_init            &
                          ,grid%mu_2, grid%mut, grid%muu, grid%muv, grid%mub                                    &
                          ,grid%al, grid%alt, grid%p, grid%pb, grid%php, cqu, cqv, cqw                          &
-                         ,grid%u_base, grid%v_base, grid%t_base, grid%t_base_pg, grid%qv_base, grid%qv_base_pg, grid%z_base     &
+                         ,grid%u_base, grid%v_base, grid%t_base, grid%qv_base, grid%z_base     &
                          ,grid%msfux,grid%msfuy, grid%msfvx, grid%msfvx_inv                                    &
                          ,grid%msfvy, grid%msftx,grid%msfty, grid%clat, grid%f, grid%e, grid%sina, grid%cosa   &
                          ,grid%fnm, grid%fnp, grid%rdn, grid%rdnw                                              &
@@ -954,7 +956,10 @@ BENCH_START(rk_tend_tim)
                          ,grid%i_start(ij), grid%i_end(ij)                                                     &
                          ,grid%j_start(ij), grid%j_end(ij)                                                     &
                          ,k_start, k_end                                                                       &
-                         ,max_vert_cfl_tmp(ij), max_horiz_cfl_tmp(ij), dz8w,grid%xtime)
+                         ,max_vert_cfl_tmp(ij), max_horiz_cfl_tmp(ij), dz8w,grid%xtime                         &
+! Piggybacking variables additional OPTIONAL, added by SN
+                         ,t_tend_pg,t_tendf_pg,grid%t_save_pg,grid%rthftenpg,grid%t_pg_2,grid%t_pg_1           &
+                         ,grid%h_diabatic_pg,grid%t_init_pg,grid%t_base_pg,grid%qv_base_pg)
 
      END DO
      !$OMP END PARALLEL DO
@@ -1017,55 +1022,24 @@ BENCH_START(relax_bdy_dry_tim)
          END IF
 
 
-!! LES_fix repeat for piggybacking
-
-         IF   ( ( config_flags%use_theta_m .EQ. 1 ) .AND. (P_Qv_PG .GE. PARAM_FIRST_SCALAR) ) THEN
-           IF ( grid%grid_id .EQ. 1 ) THEN
-              time_duration_of_lbcs = grid%interval_seconds
-           ELSE
-              time_duration_of_lbcs = grid%parent_time_step_ratio * grid%dt
-           END IF
-           CALL theta_and_thetam_lbc_only (                                                   &
-                                .TRUE.,                                                       &
-                                grid%mub,                                                     &
-                                grid%mu_bxs,grid%mu_bxe,grid%mu_bys,grid%mu_bye,              &
-                                grid%mu_btxs,grid%mu_btxe,grid%mu_btys,grid%mu_btye,          &
-                                grid%t_pg_bxs,grid%t_pg_bxe,grid%t_pg_bys,grid%t_pg_bye,                  &
-                                grid%t_pg_btxs,grid%t_pg_btxe,grid%t_pg_btys,grid%t_pg_btye,              &
-                                scalar_bxs(jms,kms,1,P_Qv_PG),scalar_bxe(jms,kms,1,P_Qv_PG),          &
-                                scalar_bys(ims,kms,1,P_Qv_PG),scalar_bye(ims,kms,1,P_Qv_PG),          &
-                                scalar_btxs(jms,kms,1,P_Qv_PG),scalar_btxe(jms,kms,1,P_Qv_PG),        &
-                                scalar_btys(ims,kms,1,P_Qv_PG),scalar_btye(ims,kms,1,P_Qv_PG),        &
-                                config_flags%spec_bdy_width,                                  &
-                                time_duration_of_lbcs,                                        &
-                                ids,ide, jds,jde, kds,kde,                                    &
-                                ims,ime, jms,jme, kms,kme,                                    &
-                                ips,ipe, jps,jpe, kps,kpe,                                    &
-                                grid%i_start(ij), grid%i_end(ij),                             &
-                                grid%j_start(ij), grid%j_end(ij),                             &
-                                k_start    , k_end                                            )
-         END IF
-
 ! LES_fix convert theta to theta_m: nested or specified LBC
 !************************************************************************************************************************
 
          CALL relax_bdy_dry ( config_flags,                                &
-                              grid%u_save, grid%v_save, ph_save, grid%t_save, grid%t_save_pg,            &
+                              grid%u_save, grid%v_save, ph_save, grid%t_save,            &
                               w_save, mu_tend,                             & 
-                              grid%ru, grid%rv, grid%ph_2, grid%t_2, grid%t_pg_2,                           &
+                              grid%ru, grid%rv, grid%ph_2, grid%t_2,                           &
                               grid%w_2, grid%mu_2, grid%mut,                              &
                               grid%u_bxs,grid%u_bxe,grid%u_bys,grid%u_bye, &
                               grid%v_bxs,grid%v_bxe,grid%v_bys,grid%v_bye, &
                               grid%ph_bxs,grid%ph_bxe,grid%ph_bys,grid%ph_bye, &
                               grid%t_bxs,grid%t_bxe,grid%t_bys,grid%t_bye, &
-                              grid%t_pg_bxs,grid%t_pg_bxe,grid%t_pg_bys,grid%t_pg_bye, &
                               grid%w_bxs,grid%w_bxe,grid%w_bys,grid%w_bye, &
                               grid%mu_bxs,grid%mu_bxe,grid%mu_bys,grid%mu_bye, &
                               grid%u_btxs,grid%u_btxe,grid%u_btys,grid%u_btye, &
                               grid%v_btxs,grid%v_btxe,grid%v_btys,grid%v_btye, &
                               grid%ph_btxs,grid%ph_btxe,grid%ph_btys,grid%ph_btye, &
                               grid%t_btxs,grid%t_btxe,grid%t_btys,grid%t_btye, &
-                              grid%t_pg_btxs,grid%t_pg_btxe,grid%t_pg_btys,grid%t_pg_btye, &
                               grid%w_btxs,grid%w_btxe,grid%w_btys,grid%w_btye, &
                               grid%mu_btxs,grid%mu_btxe,grid%mu_btys,grid%mu_btye, &
                               config_flags%spec_bdy_width, grid%spec_zone, grid%relax_zone,       &
@@ -1075,15 +1049,18 @@ BENCH_START(relax_bdy_dry_tim)
                               ips,ipe, jps,jpe, kps,kpe,                   &
                               grid%i_start(ij), grid%i_end(ij),            &
                               grid%j_start(ij), grid%j_end(ij),            &
-                              k_start, k_end                              )
+                              k_start, k_end,                              &
+                              grid%t_save_pg,grid%t_pg_2,                  &
+                              grid%t_pg_bxs,grid%t_pg_bxe,grid%t_pg_bys,grid%t_pg_bye, &
+                              grid%t_pg_btxs,grid%t_pg_btxe,grid%t_pg_btys,grid%t_pg_btye )
 
        ENDIF
 
-       CALL rk_addtend_dry( grid%ru_tend,  grid%rv_tend,  rw_tend,  ph_tend,  t_tend, t_tend_pg,  &
-                            ru_tendf, rv_tendf, rw_tendf, ph_tendf, t_tendf, t_tendf_pg, &
-                            grid%u_save, grid%v_save, w_save, ph_save, grid%t_save, grid%t_save_pg,&
+       CALL rk_addtend_dry( grid%ru_tend,  grid%rv_tend,  rw_tend,  ph_tend,  t_tend,  &
+                            ru_tendf, rv_tendf, rw_tendf, ph_tendf, t_tendf, &
+                            grid%u_save, grid%v_save, w_save, ph_save, grid%t_save,&
                             mu_tend, mu_tendf, rk_step,                      &
-                            grid%h_diabatic, grid%h_diabatic_pg,grid%mut, grid%msftx,        &
+                            grid%h_diabatic, grid%mut, grid%msftx,        &
                             grid%msfty, grid%msfux,grid%msfuy,               &
                             grid%msfvx, grid%msfvx_inv, grid%msfvy,          &
                             ids,ide, jds,jde, kds,kde,                       &
@@ -1091,24 +1068,23 @@ BENCH_START(relax_bdy_dry_tim)
                             ips,ipe, jps,jpe, kps,kpe,                       &
                             grid%i_start(ij), grid%i_end(ij),                &
                             grid%j_start(ij), grid%j_end(ij),                &
-                            k_start, k_end                                  )
+                            k_start, k_end,                                  &
+                            t_tend_pg,t_tendf_pg,grid%t_save_pg,grid%h_diabatic_pg)
 
        IF( config_flags%specified .or. config_flags%nested ) THEN 
          CALL spec_bdy_dry ( config_flags,                                    &
-                             grid%ru_tend, grid%rv_tend, ph_tend, t_tend, t_tend_pg,              &
+                             grid%ru_tend, grid%rv_tend, ph_tend, t_tend,     &
                              rw_tend, mu_tend,                                &
                              grid%u_bxs,grid%u_bxe,grid%u_bys,grid%u_bye, &
                              grid%v_bxs,grid%v_bxe,grid%v_bys,grid%v_bye, &
                              grid%ph_bxs,grid%ph_bxe,grid%ph_bys,grid%ph_bye, &
                              grid%t_bxs,grid%t_bxe,grid%t_bys,grid%t_bye, &
-                             grid%t_pg_bxs,grid%t_pg_bxe,grid%t_pg_bys,grid%t_pg_bye, &
                              grid%w_bxs,grid%w_bxe,grid%w_bys,grid%w_bye, &
                              grid%mu_bxs,grid%mu_bxe,grid%mu_bys,grid%mu_bye, &
                              grid%u_btxs,grid%u_btxe,grid%u_btys,grid%u_btye, &
                              grid%v_btxs,grid%v_btxe,grid%v_btys,grid%v_btye, &
                              grid%ph_btxs,grid%ph_btxe,grid%ph_btys,grid%ph_btye, &
                              grid%t_btxs,grid%t_btxe,grid%t_btys,grid%t_btye, &
-                             grid%t_pg_btxs,grid%t_pg_btxe,grid%t_pg_btys,grid%t_pg_btye, &
                              grid%w_btxs,grid%w_btxe,grid%w_btys,grid%w_btye, &
                              grid%mu_btxs,grid%mu_btxe,grid%mu_btys,grid%mu_btye, &
                              config_flags%spec_bdy_width, grid%spec_zone,                       &
@@ -1117,7 +1093,10 @@ BENCH_START(relax_bdy_dry_tim)
                              ips,ipe, jps,jpe, kps,kpe,  & ! patch  dims
                              grid%i_start(ij), grid%i_end(ij),                &
                              grid%j_start(ij), grid%j_end(ij),                &
-                             k_start, k_end                                  )
+                             k_start, k_end,                                  &
+                             t_tend_pg,                                       &
+                             grid%t_pg_bxs,grid%t_pg_bxe,grid%t_pg_bys,grid%t_pg_bye, &
+                             grid%t_pg_btxs,grid%t_pg_btxe,grid%t_pg_btys,grid%t_pg_btye)
 
 !************************************************************************************************************************
 ! LES_fix convert theta_m to theta: nested or specified LBC, and only in the last rk step
@@ -1145,28 +1124,6 @@ BENCH_START(relax_bdy_dry_tim)
                                 k_start    , k_end                                            )
          END IF
 
-!! Repeat for piggybacking
-         IF   ( ( config_flags%use_theta_m .EQ. 1 ) .AND. (P_Qv_PG .GE. PARAM_FIRST_SCALAR) .AND. ( rk_step == rk_order ) ) THEN
-           CALL theta_and_thetam_lbc_only (                                                   &
-                                .FALSE.,                                                      &
-                                grid%mub,                                                     &
-                                grid%mu_bxs,grid%mu_bxe,grid%mu_bys,grid%mu_bye,              &
-                                grid%mu_btxs,grid%mu_btxe,grid%mu_btys,grid%mu_btye,          &
-                                grid%t_pg_bxs,grid%t_pg_bxe,grid%t_pg_bys,grid%t_pg_bye,                  &
-                                grid%t_pg_btxs,grid%t_pg_btxe,grid%t_pg_btys,grid%t_pg_btye,              &
-                                scalar_bxs(jms,kms,1,P_Qv_PG),scalar_bxe(jms,kms,1,P_Qv_PG),          &
-                                scalar_bys(ims,kms,1,P_Qv_PG),scalar_bye(ims,kms,1,P_Qv_PG),          &
-                                scalar_btxs(jms,kms,1,P_Qv_PG),scalar_btxe(jms,kms,1,P_Qv_PG),        &
-                                scalar_btys(ims,kms,1,P_Qv_PG),scalar_btye(ims,kms,1,P_Qv_PG),        &
-                                config_flags%spec_bdy_width,                                  &
-                                time_duration_of_lbcs,                                        &
-                                ids,ide, jds,jde, kds,kde,                                    &
-                                ims,ime, jms,jme, kms,kme,                                    &
-                                ips,ipe, jps,jpe, kps,kpe,                                    &
-                                grid%i_start(ij), grid%i_end(ij),                             &
-                                grid%j_start(ij), grid%j_end(ij),                             &
-                                k_start    , k_end                                            )
-         END IF
 
 ! LES_fix convert theta_m to theta: nested or specified LBC, and only in the last rk step
 ! since we do not need the theta_m lateral boundaries any more.
@@ -1180,35 +1137,37 @@ BENCH_START(relax_bdy_dry_tim)
 !---------------------------------------------------------------------------------------------
        IF( config_flags%specified .and. config_flags%perturb_bdy==1 ) THEN 
          CALL spec_bdy_dry_perturb ( config_flags,                                 &
-                             grid%ru_tend, grid%rv_tend, t_tend, t_tend_pg,        &
+                             grid%ru_tend, grid%rv_tend, t_tend,        &
                              grid%mu_2, grid%mub,                                  &
                              grid%msfux, grid%msfvx, grid%msft,	                   &
                              grid%ru_tendf_stoch, grid%rv_tendf_stoch, grid%rt_tendf_stoch, &
-                             grid%rt_tendf_pg_stoch,config_flags%spec_bdy_width, grid%spec_zone,         &
+                             config_flags%spec_bdy_width, grid%spec_zone,         &
                              grid%num_stoch_levels,      & ! stoch dims
                              ids,ide, jds,jde, kds,kde,  & ! domain dims
                              ims,ime, jms,jme, kms,kme,  & ! memory dims
                              ips,ipe, jps,jpe, kps,kpe,  & ! patch  dims
                              grid%i_start(ij), grid%i_end(ij),                &
                              grid%j_start(ij), grid%j_end(ij),                &
-                             k_start, k_end                                  )
+                             k_start, k_end,                                  &
+                             t_tend_pg,grid%rt_tendf_pg_stoch)
      
        ENDIF
 
        IF( config_flags%specified .and. config_flags%perturb_bdy==2 ) THEN
          CALL spec_bdy_dry_perturb ( config_flags,                                 &
-                             grid%ru_tend, grid%rv_tend, t_tend, t_tend_pg,        &
+                             grid%ru_tend, grid%rv_tend, t_tend,        &
                              grid%mu_2, grid%mub,                                  &
                              grid%msfux, grid%msfvx, grid%msft,                    &
                              grid%field_u_tend_perturb, grid%field_v_tend_perturb, grid%field_t_tend_perturb, &
-                             grid%field_t_tend_pg_perturb,config_flags%spec_bdy_width, grid%spec_zone,                   &
+                             config_flags%spec_bdy_width, grid%spec_zone,                   &
                              grid%num_stoch_levels,      & ! stoch dims
                              ids,ide, jds,jde, kds,kde,  & ! domain dims
                              ims,ime, jms,jme, kms,kme,  & ! memory dims
                              ips,ipe, jps,jpe, kps,kpe,  & ! patch  dims
                              grid%i_start(ij), grid%i_end(ij),                &
                              grid%j_start(ij), grid%j_end(ij),                &
-                             k_start, k_end                                  )
+                             k_start, k_end,                                  &
+                             t_tend_pg,grid%field_t_tend_pg_perturb)
   
        ENDIF
 
@@ -1255,12 +1214,12 @@ BENCH_START(small_step_prep_tim)
        CALL wrf_debug ( 200 , ' call small_step_prep ' )
 
        CALL small_step_prep( grid%u_1,grid%u_2,grid%v_1,grid%v_2,grid%w_1,grid%w_2,   &
-                             grid%t_1,grid%t_pg_1,grid%t_2,grid%t_pg_2,grid%ph_1,grid%ph_2,                   &
+                             grid%t_1,grid%t_2,grid%ph_1,grid%ph_2,                   &
                              grid%mub, grid%mu_1, grid%mu_2,                          &
                              grid%muu, muus, grid%muv, muvs,                          &
                              grid%mut, grid%muts, grid%mudf,                          &
                              grid%u_save, grid%v_save, w_save,                        &
-                             grid%t_save, grid%t_save_pg, ph_save, mu_save,                           &
+                             grid%t_save, ph_save, mu_save,                           &
                              grid%ww, ww1,                                            &
                              c2a, grid%pb, grid%p, grid%alt,                          &
                              grid%msfux,grid%msfuy, grid%msfvx, grid%msfvx_inv,       &
@@ -1270,7 +1229,8 @@ BENCH_START(small_step_prep_tim)
                              ims, ime, jms, jme, kms, kme,                            &
                              grid%i_start(ij), grid%i_end(ij),                        &
                              grid%j_start(ij), grid%j_end(ij),                        &
-                             k_start    , k_end                                       )
+                             k_start    , k_end,                                      &
+                             grid%t_pg_1,grid%t_pg_2,grid%t_save_pg)
  
 
 
@@ -1471,7 +1431,7 @@ BENCH_START(advance_uv_tim)
                            ims, ime, jms, jme, kms, kme,                          &
                            grid%i_start(ij), grid%i_end(ij),                      &
                            grid%j_start(ij), grid%j_end(ij),                      &
-                           k_start    , k_end                                     )
+                           k_start    , k_end )
 BENCH_END(advance_uv_tim)
 
 
@@ -1571,7 +1531,7 @@ BENCH_START(advance_mu_t_tim)
          CALL advance_mu_t( grid%ww, ww1, grid%u_2, grid%u_save, grid%v_2, grid%v_save, &
                           grid%mu_2, grid%mut, muave, grid%muts, grid%muu, grid%muv,    &
                           grid%mudf, grid%ru_m, grid%rv_m, grid%ww_m,                   &
-                          grid%t_2, grid%t_pg_2, grid%t_save,grid%t_save_pg, t_2save,t_2save_pg, t_tend,t_tend_pg,                       &
+                          grid%t_2, grid%t_save, t_2save, t_tend,                       &
                           mu_tend,                                                      &
                           grid%rdx, grid%rdy, dts_rk, grid%epssm,                       &
                           grid%dnw, grid%fnm, grid%fnp, grid%rdnw,                      &
@@ -1582,7 +1542,8 @@ BENCH_START(advance_mu_t_tim)
                           ims, ime, jms, jme, kms, kme,      &
                           grid%i_start(ij), grid%i_end(ij),  &
                           grid%j_start(ij), grid%j_end(ij),  &
-                          k_start    , k_end                )
+                          k_start    , k_end ,               &
+                          grid%t_pg_2,grid%t_save_pg,t_2save_pg,t_tend_pg)
 BENCH_END(advance_mu_t_tim)
        ENDDO
        !$OMP END PARALLEL DO
@@ -1685,7 +1646,7 @@ BENCH_START(advance_w_tim)
            CALL advance_w( grid%w_2, rw_tend, grid%ww, w_save,         &
                            grid%u_2, grid%v_2,                         &
                            grid%mu_2, grid%mut, muave, grid%muts,      &
-                           t_2save,t_2save_pg, grid%t_2,grid%t_pg_2, grid%t_save, grid%t_save_pg,            &
+                           t_2save, grid%t_2, grid%t_save,             &
                            grid%ph_2, ph_save, grid%phb, ph_tend,      &
                            grid%ht, c2a, cqw, grid%alt, grid%alb,      &
                            a, alpha, gamma,                            &
@@ -1698,7 +1659,8 @@ BENCH_START(advance_w_tim)
                            ims,ime, jms,jme, kms,kme,                  &
                            grid%i_start(ij), grid%i_end(ij),           &
                            grid%j_start(ij), grid%j_end(ij),           &
-                           k_start    , k_end                          )
+                           k_start    , k_end,                          &
+                           t_2save_pg,grid%t_pg_2,grid%t_save_pg)
          ENDIF
 BENCH_END(advance_w_tim)
 
@@ -1917,20 +1879,21 @@ BENCH_START(calc_mu_uv_tim)
 BENCH_END(calc_mu_uv_tim)
 BENCH_START(small_step_finish_tim)
        CALL small_step_finish( grid%u_2, grid%u_1, grid%v_2, grid%v_1, grid%w_2, grid%w_1,     &
-                               grid%t_2, grid%t_pg_2,grid%t_1,grid%t_pg_1, grid%ph_2, grid%ph_1, grid%ww, ww1,    &
+                               grid%t_2, grid%t_1, grid%ph_2, grid%ph_1, grid%ww, ww1,    &
                                grid%mu_2, grid%mu_1,                       &
                                grid%mut, grid%muts, grid%muu, muus, grid%muv, muvs,  & 
                                grid%u_save, grid%v_save, w_save,           &
-                               grid%t_save,grid%t_save_pg, ph_save, mu_save,         &
+                               grid%t_save, ph_save, mu_save,         &
                                grid%msfux,grid%msfuy, grid%msfvx,grid%msfvy, grid%msftx,grid%msfty, &
-                               grid%h_diabatic,grid%h_diabatic_pg,                       &
+                               grid%h_diabatic,                       &
                                number_of_small_timesteps,dts_rk, &
                                rk_step, rk_order,                &
                                ids, ide, jds, jde, kds, kde,     &
                                ims, ime, jms, jme, kms, kme,     &
                                grid%i_start(ij), grid%i_end(ij), &
                                grid%j_start(ij), grid%j_end(ij), &
-                               k_start    , k_end               )
+                               k_start    , k_end,               &
+                               grid%t_pg_2,grid%t_pg_1,grid%t_save_pg,grid%h_diabatic_pg)
 !  call  to set ru_m, rv_m and ww_m b.c's for PD advection
 
        IF (rk_step == rk_order) THEN
@@ -2292,18 +2255,6 @@ BENCH_END(small_step_finish_tim)
                                      grid%i_start(ij), grid%i_end(ij),        &
                                      grid%j_start(ij), grid%j_end(ij),        &
                                      k_start    , k_end                       )
-           CALL wrf_debug ( 200 , ' call rk_update_scalar_pd piggybacking' )
-           CALL rk_update_scalar_pd( 1, 1,                                    &
-                                     grid%tke_pg_1,                              &
-                                     tke_tend_pg(ims,kms,jms),                   &
-                                     grid%mu_1, grid%mu_1, grid%mub,          &
-                                     rk_step, dt_rk, grid%spec_zone,          &
-                                     config_flags,                            &
-                                     ids, ide, jds, jde, kds, kde,            &
-                                     ims, ime, jms, jme, kms, kme,            &
-                                     grid%i_start(ij), grid%i_end(ij),        &
-                                     grid%j_start(ij), grid%j_end(ij),        &
-                                     k_start    , k_end                       )
 
          ENDDO
          !$OMP END PARALLEL DO
@@ -2336,13 +2287,7 @@ BENCH_END(small_step_finish_tim)
                                     grid%i_start(ij), grid%i_end(ij),  &
                                     grid%j_start(ij), grid%j_end(ij),  &
                                     k_start    , k_end                )
-           CALL set_physical_bc3d(  grid%tke_pg_1, 'p', config_flags,  &
-                                    ids, ide, jds, jde, kds, kde,      &
-                                    ims, ime, jms, jme, kms, kme,      &
-                                    ips, ipe, jps, jpe, kps, kpe,      &
-                                    grid%i_start(ij), grid%i_end(ij),  &
-                                    grid%j_start(ij), grid%j_end(ij),  &
-                                    k_start    , k_end                )
+
          END DO
          !$OMP END PARALLEL DO
 
@@ -2411,8 +2356,8 @@ BENCH_START(rk_scalar_tend_tim)
                            moist_old(ims,kms,jms,im),                        &
                            moist(ims,kms,jms,im),                            &
                            moist_tend(ims,kms,jms,im),                       &
-                           advect_tend,h_tendency,z_tendency,grid%rqvften,grid%rqvftenpg,   & 
-                           grid%qv_base, grid%qv_base_pg,.true., grid%fnm, grid%fnp,         &
+                           advect_tend,h_tendency,z_tendency,grid%rqvften,   & 
+                           grid%qv_base, .true., grid%fnm, grid%fnp,         &
                            grid%msfux,grid%msfuy, grid%msfvx, grid%msfvx_inv,&
                            grid%msfvy, grid%msftx,grid%msfty,                & 
                            grid%rdx, grid%rdy, grid%rdn, grid%rdnw, grid%khdif, &
@@ -2423,7 +2368,8 @@ BENCH_START(rk_scalar_tend_tim)
                            ims, ime, jms, jme, kms, kme,     &
                            grid%i_start(ij), grid%i_end(ij), &
                            grid%j_start(ij), grid%j_end(ij), &
-                           k_start    , k_end               )
+                           k_start    , k_end,               &
+                           grid%rqvftenpg,  grid%qv_base_pg)
 
                IF( rk_step == 1 .AND. config_flags%use_q_diabatic == 1 )THEN
                IF( im.eq.p_qv .or. im.eq.p_qc )THEN
@@ -2572,8 +2518,8 @@ BENCH_START(tke_adv_tim)
                             grid%tke_1,                                            &
                             grid%tke_2,                                            &
                             tke_tend(ims,kms,jms),                                 &
-                            advect_tend,h_tendency,z_tendency,grid%rqvften, grid%rqvftenpg,        & 
-                            grid%qv_base, grid%qv_base_pg, .false., grid%fnm, grid%fnp,             &
+                            advect_tend,h_tendency,z_tendency,grid%rqvften,        & 
+                            grid%qv_base, .false., grid%fnm, grid%fnp,             &
                             grid%msfux,grid%msfuy, grid%msfvx, grid%msfvx_inv,     &
                             grid%msfvy, grid%msftx,grid%msfty,                     &
                             grid%rdx, grid%rdy, grid%rdn, grid%rdnw, grid%khdif,   &
@@ -2584,31 +2530,8 @@ BENCH_START(tke_adv_tim)
                             ims, ime, jms, jme, kms, kme,     &
                             grid%i_start(ij), grid%i_end(ij), &
                             grid%j_start(ij), grid%j_end(ij), &
-                            k_start    , k_end               )
-
-           CALL wrf_debug ( 200 , ' call rk_scalar_tend for piggybacking tke' )
-           tenddec = .false.
-           CALL rk_scalar_tend ( 1, 1, config_flags, tenddec,                      &
-                            rk_step, dt_rk,                                        &
-                            grid%ru_m, grid%rv_m, grid%ww_m,                       &
-                            grid%muts, grid%mub, grid%mu_1,                        &
-                            grid%alt,                                              &
-                            grid%tke_pg_1,                                            &
-                            grid%tke_pg_2,                                            &
-                            tke_tend_pg(ims,kms,jms),                                 &
-                            advect_tend_pg,h_tendency,z_tendency,grid%rqvften, grid%rqvftenpg,        &
-                            grid%qv_base, grid%qv_base_pg, .false., grid%fnm, grid%fnp,             &
-                            grid%msfux,grid%msfuy, grid%msfvx, grid%msfvx_inv,     &
-                            grid%msfvy, grid%msftx,grid%msfty,                     &
-                            grid%rdx, grid%rdy, grid%rdn, grid%rdnw, grid%khdif,   &
-                            grid%kvdif, grid%xkhh,                                 &
-                            grid%diff_6th_opt, grid%diff_6th_factor,               &
-                            config_flags%tke_adv_opt,                              &
-                            ids, ide, jds, jde, kds, kde,     &
-                            ims, ime, jms, jme, kms, kme,     &
-                            grid%i_start(ij), grid%i_end(ij), &
-                            grid%j_start(ij), grid%j_end(ij), &
-                            k_start    , k_end               )
+                            k_start    , k_end,               &
+                            grid%rqvftenpg,  grid%qv_base_pg)
 
 
          ENDDO tke_tile_loop_1
@@ -2636,23 +2559,6 @@ BENCH_START(tke_adv_tim)
                                   jts=grid%j_start(ij), jte=grid%j_end(ij),               &
                                   kts=k_start    , kte=k_end                              )
 
-           CALL wrf_debug ( 200 , ' call rk_update_scalar tke piggybacking' )
-           tenddec = .false.
-           CALL rk_update_scalar( scs=1,  sce=1,                                          &
-                                  scalar_1=grid%tke_pg_1,                                    &
-                                  scalar_2=grid%tke_pg_2,                                    &
-                                  sc_tend=tke_tend_pg(ims,kms,jms),                          &
-                                  advect_tend=advect_tend_pg,                                &
-                                  h_tendency=h_tendency, z_tendency=z_tendency,           &
-                                  msftx=grid%msftx,msfty=grid%msfty,                      &
-                                  mu_old=grid%mu_1, mu_new=grid%mu_2, mu_base=grid%mub,   &
-                                  rk_step=rk_step, dt=dt_rk, spec_zone=grid%spec_zone,    &
-                                  config_flags=config_flags, tenddec=tenddec,             &
-                                  ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,   &
-                                  ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,   &
-                                  its=grid%i_start(ij), ite=grid%i_end(ij),               &
-                                  jts=grid%j_start(ij), jte=grid%j_end(ij),               &
-                                  kts=k_start    , kte=k_end                              )
 
 
 ! bound the tke (greater than 0, less than tke_upper_bound)
@@ -2664,27 +2570,9 @@ BENCH_START(tke_adv_tim)
                            grid%j_start(ij), grid%j_end(ij),    &
                            k_start    , k_end                  )
 
-! bound the tke (greater than 0, less than tke_upper_bound)
-
-           CALL bound_tke( grid%tke_pg_2, grid%tke_upper_bound,    &
-                           ids, ide, jds, jde, kds, kde,        &
-                           ims, ime, jms, jme, kms, kme,        &
-                           grid%i_start(ij), grid%i_end(ij),    &
-                           grid%j_start(ij), grid%j_end(ij),    &
-                           k_start    , k_end                  )
-
 
            IF( config_flags%specified .or. config_flags%nested ) THEN
               CALL flow_dep_bdy (  grid%tke_2,                     &
-                                   grid%ru_m, grid%rv_m, config_flags,               &
-                                   grid%spec_zone,                              &
-                                   ids,ide, jds,jde, kds,kde,  & ! domain dims
-                                   ims,ime, jms,jme, kms,kme,  & ! memory dims
-                                   ips,ipe, jps,jpe, kps,kpe,  & ! patch  dims
-                                   grid%i_start(ij), grid%i_end(ij),       &
-                                   grid%j_start(ij), grid%j_end(ij),       &
-                                   k_start, k_end                               )
-              CALL flow_dep_bdy (  grid%tke_pg_2,                     &
                                    grid%ru_m, grid%rv_m, config_flags,               &
                                    grid%spec_zone,                              &
                                    ids,ide, jds,jde, kds,kde,  & ! domain dims
@@ -2723,8 +2611,8 @@ BENCH_START(chem_adv_tim)
                               chem_old(ims,kms,jms,ic),                          &
                               chem(ims,kms,jms,ic),                              &
                               chem_tend(ims,kms,jms,ic),                         &
-                              advect_tend,h_tendency,z_tendency,grid%rqvften, grod%rqvftenpg,   & 
-                              grid%qv_base, grid%qv_base_pg,.false., grid%fnm, grid%fnp,         &
+                              advect_tend,h_tendency,z_tendency,grid%rqvften,    & 
+                              grid%qv_base, .false., grid%fnm, grid%fnp,         &
                               grid%msfux,grid%msfuy, grid%msfvx, grid%msfvx_inv, &
                               grid%msfvy, grid%msftx,grid%msfty,                 &
                               grid%rdx, grid%rdy, grid%rdn, grid%rdnw,           &
@@ -2735,7 +2623,8 @@ BENCH_START(chem_adv_tim)
                               ims, ime, jms, jme, kms, kme,                      &
                               grid%i_start(ij), grid%i_end(ij),                  &
                               grid%j_start(ij), grid%j_end(ij),                  &
-                              k_start    , k_end                                )
+                              k_start    , k_end,               &
+                              grid%rqvftenpg,  grid%qv_base_pg)
 !
 ! Currently, chemistry species with specified boundaries (i.e. the mother
 ! domain)  are being over written by flow_dep_bdy_chem. So, relax_bdy and
@@ -2869,8 +2758,8 @@ BENCH_START(tracer_adv_tim)
                               tracer_old(ims,kms,jms,ic),                          &
                               tracer(ims,kms,jms,ic),                              &
                               tracer_tend(ims,kms,jms,ic),                         &
-                              advect_tend,h_tendency,z_tendency,grid%rqvften,grid%rqvftenpg,    & 
-                              grid%qv_base, grid%qv_base_pg, .false., grid%fnm, grid%fnp,         &
+                              advect_tend,h_tendency,z_tendency,grid%rqvften,    & 
+                              grid%qv_base, .false., grid%fnm, grid%fnp,         &
                               grid%msfux,grid%msfuy, grid%msfvx, grid%msfvx_inv, &
                               grid%msfvy, grid%msftx,grid%msfty,                 &
                               grid%rdx, grid%rdy, grid%rdn, grid%rdnw,           &
@@ -2881,7 +2770,8 @@ BENCH_START(tracer_adv_tim)
                               ims, ime, jms, jme, kms, kme,                      &
                               grid%i_start(ij), grid%i_end(ij),                  &
                               grid%j_start(ij), grid%j_end(ij),                  &
-                              k_start    , k_end                                )
+                              k_start    , k_end,               &
+                           grid%rqvftenpg,  grid%qv_base_pg                                )
 !
 ! Currently, chemistry species with specified boundaries (i.e. the mother
 ! domain)  are being over written by flow_dep_bdy_chem. So, relax_bdy and
@@ -3004,8 +2894,8 @@ BENCH_END(tracer_adv_tim)
                                  scalar_old(ims,kms,jms,is),                      &
                                  scalar(ims,kms,jms,is),                          &
                                  scalar_tend(ims,kms,jms,is),                     &
-                                 advect_tend,h_tendency,z_tendency,grid%rqvften,grid%rqvftenpg,  & 
-                                 grid%qv_base,grid%qv_base_pg, .false., grid%fnm, grid%fnp,       &
+                                 advect_tend,h_tendency,z_tendency,grid%rqvften,  & 
+                                 grid%qv_base, .false., grid%fnm, grid%fnp,       &
                                  grid%msfux,grid%msfuy, grid%msfvx, grid%msfvx_inv, &
                                  grid%msfvy, grid%msftx,grid%msfty,               &
                                  grid%rdx, grid%rdy, grid%rdn, grid%rdnw,         &
@@ -3016,7 +2906,8 @@ BENCH_END(tracer_adv_tim)
                                  ims, ime, jms, jme, kms, kme,     &
                                  grid%i_start(ij), grid%i_end(ij), &
                                  grid%j_start(ij), grid%j_end(ij), &
-                                 k_start    , k_end               )
+                                 k_start    , k_end ,               &
+                           grid%rqvftenpg,  grid%qv_base_pg)
 
            IF( rk_step == 1 ) THEN
              IF ( config_flags%nested .OR. &
@@ -3460,13 +3351,14 @@ BENCH_START(bc_end_tim)
 
          CALL rk_phys_bc_dry_2( config_flags,                     &
                                 grid%u_2, grid%v_2, grid%w_2,     &
-                                grid%t_2, grid%t_pg_2,grid%ph_2, grid%mu_2,   &
+                                grid%t_2, grid%ph_2, grid%mu_2,   &
                                 ids, ide, jds, jde, kds, kde,     &
                                 ims, ime, jms, jme, kms, kme,     &
                                 ips, ipe, jps, jpe, kps, kpe,     &
                                 grid%i_start(ij), grid%i_end(ij), &
                                 grid%j_start(ij), grid%j_end(ij), &
-                                k_start    , k_end               )
+                                k_start    , k_end ,              &
+                                grid%t_pg_2)
 
 BENCH_START(diag_w_tim)
          IF (.not. config_flags%non_hydrostatic) THEN
@@ -3547,13 +3439,6 @@ BENCH_END(diag_w_tim)
          IF (config_flags%km_opt .eq. 2) THEN
 
            CALL set_physical_bc3d( grid%tke_2 , 'p', config_flags,  &
-                                   ids, ide, jds, jde, kds, kde,            &
-                                   ims, ime, jms, jme, kms, kme,            &
-                                   ips, ipe, jps, jpe, kps, kpe,            &
-                                   grid%i_start(ij), grid%i_end(ij),        &
-                                   grid%j_start(ij), grid%j_end(ij),        &
-                                   k_start    , k_end                      )
-           CALL set_physical_bc3d( grid%tke_pg_2 , 'p', config_flags,  &
                                    ids, ide, jds, jde, kds, kde,            &
                                    ims, ime, jms, jme, kms, kme,            &
                                    ips, ipe, jps, jpe, kps, kpe,            &
@@ -3829,18 +3714,21 @@ BENCH_END(advance_ppt_tim)
 
        CALL wrf_debug ( 200 , ' call moist_physics_prep' )
 BENCH_START(moist_physics_prep_tim)
-       CALL moist_physics_prep_em( grid%t_2,grid%t_pg_2, grid%t_1, grid%t_pg_1,t0, grid%rho,           &
+       CALL moist_physics_prep_em( grid%t_2, grid%t_1, t0, grid%rho,           &
                                    grid%al, grid%alb, grid%p, p8w, p0, grid%pb,          &
-                                   grid%ph_2, grid%phb, th_phy,th_phy_pg, pi_phy , p_phy, &
+                                   grid%ph_2, grid%phb, th_phy, pi_phy , p_phy, &
                                    grid%z, grid%z_at_w, dz8w,        &
-                                   dtm, grid%h_diabatic,grid%h_diabatic_pg,    &
-                                   moist(ims,kms,jms,P_QV),scalar(ims,kms,jms,P_QV_PG),grid%qv_diabatic,grid%qv_diabatic_pg,   &
-                                   moist(ims,kms,jms,P_QC),scalar(ims,kms,jms,P_QC_PG),grid%qc_diabatic,grid%qc_diabatic_pg,   &
+                                   dtm, grid%h_diabatic,    &
+                                   moist(ims,kms,jms,P_QV),grid%qv_diabatic,   &
+                                   moist(ims,kms,jms,P_QC),grid%qc_diabatic,   &
                                    config_flags,grid%fnm, grid%fnp,            &
                                    ids, ide, jds, jde, kds, kde,     &
                                    ims, ime, jms, jme, kms, kme,     &
                                    its, ite, jts, jte,               &
-                                   k_start    , k_end               )
+                                   k_start    , k_end,               &
+                                   grid%t_pg_2,grid%t_pg_1,th_phy_pg,grid%h_diabatic_pg, &
+                                   scalar(ims,kms,jms,P_QV_PG),grid%qv_diabatic_pg, &
+                                   scalar(ims,kms,jms,P_QC_PG),grid%qc_diabatic_pg)
 BENCH_END(moist_physics_prep_tim)
      END DO scalar_tile_loop_1a
      !$OMP END PARALLEL DO
@@ -4185,10 +4073,10 @@ BENCH_START(moist_phys_end_tim)
                       its, ite, jts, jte,                               &
                       k_start    , k_end                                )
 
-       CALL moist_physics_finish_em( grid%t_2,grid%t_pg_2, grid%t_1,grid%t_pg_1, t0, grid%muts, th_phy, th_phy_pg,      &
-                                      grid%h_diabatic, grid%h_diabatic_pg,dtm,                    &
-                                      moist(ims,kms,jms,P_QV),scalar(ims,kms,jms,P_QV_PG),grid%qv_diabatic,grid%qv_diabatic_pg, &
-                                      moist(ims,kms,jms,P_QC),scalar(ims,kms,jms,P_QC_PG),grid%qc_diabatic, grid%qc_diabatic_pg,&
+       CALL moist_physics_finish_em( grid%t_2, grid%t_1, t0, grid%muts, th_phy,      &
+                                      grid%h_diabatic, dtm,                    &
+                                      moist(ims,kms,jms,P_QV),grid%qv_diabatic, &
+                                      moist(ims,kms,jms,P_QC),grid%qc_diabatic,&
                                       config_flags,                            &
 #if ( WRF_DFI_RADAR == 1 )
                                       grid%dfi_tten_rad,grid%dfi_tten_rad_pg,grid%dfi_stage,        &
@@ -4196,7 +4084,10 @@ BENCH_START(moist_phys_end_tim)
                                       ids, ide, jds, jde, kds, kde,     &
                                       ims, ime, jms, jme, kms, kme,     &
                                       its, ite, jts, jte,               &
-                                      k_start    , k_end               )
+                                      k_start    , k_end,                &
+                                      grid%t_pg_2,grid%t_pg_1,th_phy_pg,grid%h_diabatic_pg, &
+                                      scalar(ims,kms,jms,P_QV_PG),grid%qv_diabatic_pg,  &
+                                      scalar(ims,kms,jms,P_QC_PG), grid%qc_diabatic_pg)
 
      END DO
      !$OMP END PARALLEL DO
@@ -4549,13 +4440,14 @@ BENCH_START(bc_2d_tim)
 
      CALL set_phys_bc_dry_2( config_flags,                           &
                              grid%u_1, grid%u_2, grid%v_1, grid%v_2, grid%w_1, grid%w_2,           &
-                             grid%t_1, grid%t_pg_1, grid%t_2,grid%t_pg_2, grid%ph_1, grid%ph_2, grid%mu_1, grid%mu_2,       &
+                             grid%t_1, grid%t_2, grid%ph_1, grid%ph_2, grid%mu_1, grid%mu_2,       &
                              ids, ide, jds, jde, kds, kde,           &
                              ims, ime, jms, jme, kms, kme,           &
                              ips, ipe, jps, jpe, kps, kpe,           &
                              grid%i_start(ij), grid%i_end(ij),       &
                              grid%j_start(ij), grid%j_end(ij),       &
-                             k_start    , k_end                     )
+                             k_start    , k_end,                     &
+                             grid%t_pg_1,grid%t_pg_2)
 
      CALL set_physical_bc3d( grid%tke_1, 'p', config_flags,   &
                              ids, ide, jds, jde, kds, kde,            &
@@ -4565,23 +4457,7 @@ BENCH_START(bc_2d_tim)
                              grid%j_start(ij), grid%j_end(ij),        &
                              k_start    , k_end-1                    )
 
-     CALL set_physical_bc3d( grid%tke_pg_1, 'p', config_flags,   &
-                             ids, ide, jds, jde, kds, kde,            &
-                             ims, ime, jms, jme, kms, kme,            &
-                             ips, ipe, jps, jpe, kps, kpe,            &
-                             grid%i_start(ij), grid%i_end(ij),        &
-                             grid%j_start(ij), grid%j_end(ij),        &
-                             k_start    , k_end-1                    )
-
      CALL set_physical_bc3d( grid%tke_2 , 'p', config_flags,  &
-                             ids, ide, jds, jde, kds, kde,            &
-                             ims, ime, jms, jme, kms, kme,            &
-                             ips, ipe, jps, jpe, kps, kpe,            &
-                             grid%i_start(ij), grid%i_end(ij),        &
-                             grid%j_start(ij), grid%j_end(ij),        &
-                             k_start    , k_end                      )
-
-     CALL set_physical_bc3d( grid%tke_pg_2 , 'p', config_flags,  &
                              ids, ide, jds, jde, kds, kde,            &
                              ims, ime, jms, jme, kms, kme,            &
                              ips, ipe, jps, jpe, kps, kpe,            &
@@ -4875,8 +4751,8 @@ BENCH_END(bc_2d_tim)
 
   CALL after_all_rk_steps ( grid, config_flags,                  &
                             moist, chem, tracer, scalar,         &
-                            th_phy, th_phy_pg, pi_phy, p_phy, rho_phy,      &   
-                            p8w, t8w, t8w_pg, dz8w,                      &
+                            th_phy, pi_phy, p_phy, rho_phy,      &   
+                            p8w, t8w, dz8w,                      &
                             curr_secs2,                          &
                             diag_flag,                           &
                             ids,  ide,  jds,  jde,  kds,  kde,   &
@@ -4885,7 +4761,8 @@ BENCH_END(bc_2d_tim)
                             imsx, imex, jmsx, jmex, kmsx, kmex,  &
                             ipsx, ipex, jpsx, jpex, kpsx, kpex,  &
                             imsy, imey, jmsy, jmey, kmsy, kmey,  &
-                            ipsy, ipey, jpsy, jpey, kpsy, kpey   )
+                            ipsy, ipey, jpsy, jpey, kpsy, kpey,  &
+                            th_phy_pg,t8w_pg)
 
 
 

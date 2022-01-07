@@ -1095,12 +1095,12 @@ endif
                       ,grid%SH_URB2D_mosaic,grid%LH_URB2D_mosaic                                     & ! danli mosaic 
                       ,grid%G_URB2D_mosaic,grid%RN_URB2D_mosaic                                      & ! danli mosaic 
                       ,grid%TS_URB2D_mosaic                                                          & ! danli mosaic 
-                      ,grid%TS_RUL2D_mosaic                                                          & ! danli mosaic
-!... Piggybacking variables added by SN OPTIONAL          
-		              ,grid%rthbltenpg                                       &
-                      ,grid%rqvbltenpg,grid%rqcbltenpg,grid%rqibltenpg       &
-                      ,grid%rthratenpg,grid%rthratenlwpg,grid%rthratenswpg   &
- 					  ,grid%cldfra_pg,grid%hfx_pg,grid%qfx_pg)
+                      ,grid%TS_RUL2D_mosaic      )                                                     ! danli mosaic
+!!... Piggybacking variables added by SN OPTIONAL          
+!!		      ,grid%rthbltenpg                                       &
+!!                      ,grid%rqvbltenpg,grid%rqcbltenpg,grid%rqibltenpg       &
+!!                      ,grid%rthratenpg,grid%rthratenlwpg,grid%rthratenswpg   &
+!! 		      ,grid%cldfra_pg,grid%hfx_pg,grid%qfx_pg)
        ENDIF   !tgs
 
    ENDDO

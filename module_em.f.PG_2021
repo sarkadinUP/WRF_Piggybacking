@@ -216,8 +216,8 @@ SUBROUTINE rk_tendency ( config_flags, rk_step,                           &
                          max_vert_cfl, max_horiz_cfl,dz8w, xtime,         &          !  Arguments, dz82, xtime added by Morrison, M.
 !... Piggybacking variables added by SN OPTIONAL          
                          t_tend_pg,t_tendf_pg,t_save_pg,RTHFTENPG,t_pg,   &
-						 t_pg_old,h_diabatic_pg,t_init_pg,t_base_pg,      &
-						 qv_base_pg	)
+			 t_pg_old,h_diabatic_pg,t_init_pg,t_base_pg,      &
+			 qv_base_pg	)
 
 
    IMPLICIT NONE
@@ -945,7 +945,7 @@ SUBROUTINE rk_addtend_dry ( ru_tend, rv_tend, rw_tend, ph_tend, t_tend,  &
                             ips,ipe, jps,jpe, kps,kpe,                       &
                             its,ite, jts,jte, kts,kte,                       &
 !... Piggybacking variables added by SN OPTIONAL          
-                            t_tend_pg,t_tendf_pg,t_save_pg,h_diabatic_pg	)							
+                            t_tend_pg,t_tendf_pg,t_save_pg,h_diabatic_pg)							
 
    IMPLICIT NONE
 
@@ -2021,9 +2021,8 @@ SUBROUTINE calculate_phy_tend (config_flags,mu,muu,muv,pi3d,           &
                      ims,ime, jms,jme, kms,kme,                        &
                      its,ite, jts,jte, kts,kte,                        &
 !... Piggybacking variables added by SN OPTIONAL          
-                     RTHRATENPG,RTHBLTENPG,							   &
-                     RQVBLTENPG,RQCBLTENPG,RQIBLTENPG,                 &
-					 )						
+                     RTHRATENPG,RTHBLTENPG,			       &
+                     RQVBLTENPG,RQCBLTENPG,RQIBLTENPG            )						
 !-----------------------------------------------------------------------
       IMPLICIT NONE
 

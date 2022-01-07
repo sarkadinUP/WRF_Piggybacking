@@ -277,7 +277,7 @@ CONTAINS
              !  Optional moisture tracer flags
      &           ,f_qv_pg,f_qc_pg,f_qr_pg                                      &
      &           ,f_qi_pg,f_qs_pg,f_qg_pg                                      &
-     &          ,rainncvpg,graupelncvpg,hailncvpg                     )
+     &          ,rainncvpg,snowncvpg,graupelncvpg,hailncvpg                   )
 
               
 #if ( ! NMM_CORE == 1 )
@@ -1005,7 +1005,7 @@ CONTAINS
                       qv_curr_pg, qc_curr_pg, qr_curr_pg                  &
                      ,qi_curr_pg, qs_curr_pg, qg_curr_pg
 
-   REAL, DIMENSION( ims:ime, jms:jme ), OPTIONAL, INTENT(IN)   ::   snowncv
+   REAL, DIMENSION( ims:ime, jms:jme ), OPTIONAL, INTENT(IN)   ::   snowncv,snowncvpg
    REAL, DIMENSION( ims:ime, jms:jme ), OPTIONAL, INTENT(IN)   ::   graupelncv,graupelncvpg
    REAL, DIMENSION( ims:ime, jms:jme ), OPTIONAL, INTENT(IN)   ::   hailncv,hailncvpg
    REAL, DIMENSION( ims:ime, jms:jme ), OPTIONAL, INTENT(INOUT)::   capg
@@ -1895,42 +1895,39 @@ CONTAINS
          CALL wrf_debug( 100, 'in SFCLAY' )
          IF ( FRACTIONAL_SEAICE == 1 ) THEN
             CALL SFCLAYREV_SEAICE_WRAPPER(u_phytmp,v_phytmp,t_phy,      &
-                 t_phy_pg,qv_curr,qv_curr_pg,&
+                 qv_curr,&
                  p_phy,dz8w,cp,g,rcp,r_d,xlv,psfc,chs,chs2,cqs2,cpm, &
                  znt,ust,pblh,mavail,zol,mol,regime,psim,psih,fm,fhh, &
-                 xland,hfx,hfx_pg,qfx,qfx_pg,lh,lh_pg,tsk,flhc,flqc,qgh,&
+                 xland,hfx,qfx,lh,tsk,flhc,flqc,qgh,&
                  qsfc,rmol,       &
-                 u10,v10,th2,th2_pg,t2,t2_pg,q2,q2_pg,                                  &
+                 u10,v10,th2,t2,q2,                                  &
                  gz1oz0,wspd,br,isfflx,dx,                           &
                  svp1,svp2,svp3,svpt0,ep_1,ep_2,karman,eomeg,stbolt, &
                  P1000mb,                                            &
                  XICE,SST,TSK_SEA,                                                  &
                  CHS2_SEA,CHS_SEA,CPM_SEA,CQS2_SEA,FLHC_SEA,FLQC_SEA,               &
-                 HFX_SEA,HFX_PG_SEA,LH_SEA,LH_PG_SEA,QFX_SEA,QFX_PG_SEA,&
+                 HFX_SEA,LH_SEA,QFX_SEA,&
                  QGH_SEA,QSFC_SEA,ZNT_SEA,                   &
                  ITIMESTEP,TICE2TSK_IF2COLD,XICE_THRESHOLD,                         &
                  ids,ide, jds,jde, kds,kde,                          &
                  ims,ime, jms,jme, kms,kme,                          &
                  i_start(ij),i_end(ij), j_start(ij),j_end(ij), kts,kte,    &
                  ustm,ck,cka,cd,cda,isftcflx,iz0tlnd,                &
-                 sf_surface_physics,dt  )
+                 sf_surface_physics  )
          ELSE
-! 2021. 07. 04. piggybacking modified by SN followed by X.L.
-         CALL SFCLAYREV(u_phytmp,v_phytmp,t_phy,t_phy_pg,qv_curr,       &
-               qv_curr_pg, &
+         CALL SFCLAYREV(u_phytmp,v_phytmp,t_phy,qv_curr,       &
                p_phy,dz8w,cp,g,rcp,r_d,xlv,psfc,chs,chs2,cqs2,cpm, &
                znt,ust,pblh,mavail,zol,mol,regime,psim,psih,fm,fhh, &
-               xland,hfx,hfx_pg,qfx,qfx_pg,lh,lh_pg,tsk,flhc,flqc,qgh,  &
+               xland,hfx,qfx,lh,tsk,flhc,flqc,qgh,  &
                qsfc,rmol,       &
-               u10,v10,th2,th2_pg,t2,t2_pg,q2,q2_pg,                                  &
+               u10,v10,th2,t2,q2,                                  &
                gz1oz0,wspd,br,isfflx,dx,                           &
                svp1,svp2,svp3,svpt0,ep_1,ep_2,karman,eomeg,stbolt, &
                P1000mb,                                            &
                ids,ide, jds,jde, kds,kde,                          &
                ims,ime, jms,jme, kms,kme,                          &
                i_start(ij),i_end(ij), j_start(ij),j_end(ij), kts,kte,    &
-               ustm,ck,cka,cd,cda,isftcflx,iz0tlnd, scm_force_flux,      &
-               itimestep,dt   )
+               ustm,ck,cka,cd,cda,isftcflx,iz0tlnd, scm_force_flux )
 
 #if ( EM_CORE==1)
            DO j = j_start(ij),j_end(ij)
@@ -5244,14 +5241,14 @@ TICE2TSK_IF2COLD,XICE_THRESHOLD,                                   &
 
 !-------------------------------------------------------------------------
 
-   SUBROUTINE sfclayrev_seaice_wrapper(U3D,V3D,T3D,T3D_PG,QV3D,QV3D_PG, &
+   SUBROUTINE sfclayrev_seaice_wrapper(U3D,V3D,T3D,QV3D, &
                      P3D,dz8w,     &
                      CP,G,ROVCP,R,XLV,PSFC,CHS,CHS2,CQS2,CPM,      &
                      ZNT,UST,PBLH,MAVAIL,ZOL,MOL,REGIME,PSIM,PSIH, &
                      FM,FH,                                        &
-                     XLAND,HFX,HFX_PG,QFX,QFX_PG,LH,LH_PG,TSK,FLHC,FLQC,&
+                     XLAND,HFX,QFX,LH,TSK,FLHC,FLQC,&
                      QGH,QSFC,RMOL, &
-                     U10,V10,TH2,TH2_PG,T2,T2_PG,Q2,Q2_PG,                            &
+                     U10,V10,TH2,T2,Q2,                            &
                      GZ1OZ0,WSPD,BR,ISFFLX,DX,                     &
                      SVP1,SVP2,SVP3,SVPT0,EP1,EP2,                 &
                      KARMAN,EOMEG,STBOLT,                          &
@@ -5259,14 +5256,14 @@ TICE2TSK_IF2COLD,XICE_THRESHOLD,                                   &
                      XICE,SST,TSK_SEA,                                                  &
                      CHS2_SEA,CHS_SEA,CPM_SEA,CQS2_SEA,FLHC_SEA,   &
                      FLQC_SEA,               &
-                     HFX_SEA,HFX_PG_SEA,LH_SEA,LH_PG_SEA,QFX_SEA,  &
-                     QFX_PG_SEA,QGH_SEA,QSFC_SEA,ZNT_SEA,                   &
+                     HFX_SEA,LH_SEA,QFX_SEA,  &
+                     QGH_SEA,QSFC_SEA,ZNT_SEA,                   &
                      ITIMESTEP,TICE2TSK_IF2COLD,XICE_THRESHOLD,                         &
                      ids,ide, jds,jde, kds,kde,                    &
                      ims,ime, jms,jme, kms,kme,                    &
                      its,ite, jts,jte, kts,kte,                    &
                      ustm,ck,cka,cd,cda,isftcflx,iz0tlnd,          &
-                     sf_surface_physics,dt                          )
+                     sf_surface_physics                          )
 
      USE module_sf_sfclayrev
      implicit none
@@ -5285,10 +5282,9 @@ TICE2TSK_IF2COLD,XICE_THRESHOLD,                                   &
 
      REAL,     DIMENSION( ims:ime, kms:kme, jms:jme )           , &
                INTENT(IN   )   ::                           QV3D, &
-	       		       				 QV3D_PG, &   	      
                                                              P3D, &
-                                                             T3D, &
-							  T3D_PG  
+                                                             T3D
+					
 
      REAL,     DIMENSION( ims:ime, jms:jme )                    , &
                INTENT(IN   )               ::             MAVAIL, &
@@ -5299,20 +5295,14 @@ TICE2TSK_IF2COLD,XICE_THRESHOLD,                                   &
                INTENT(OUT  )               ::                U10, &
                                                              V10, &
                                                              TH2, &
-							  TH2_PG, &   
                                                               T2, &
-							   T2_PG, &   
                                                               Q2, &
-							   Q2_PG, &   
                                                             QSFC
      REAL,     DIMENSION( ims:ime, jms:jme )                    , &
                INTENT(INOUT)               ::             REGIME, &
                                                              HFX, &
-							  HFX_PG, &   
                                                              QFX, &
-							  QFX_PG, &   
                                                               LH, &
-							   LH_PG, &   
                                                          MOL,RMOL
 
      REAL,     DIMENSION( ims:ime, jms:jme )                    , &
@@ -5350,7 +5340,6 @@ TICE2TSK_IF2COLD,XICE_THRESHOLD,                                   &
                INTENT(INOUT)   ::                            ustm
 
      INTEGER,  OPTIONAL,  INTENT(IN )   ::     ISFTCFLX,IZ0TLND
-     REAL,OPTIONAL, INTENT(IN )::   DT
 
 !--------------------------------------------------------------------
 !    New for wrapper
@@ -5371,11 +5360,8 @@ TICE2TSK_IF2COLD,XICE_THRESHOLD,                                   &
                                                 FLHC_SEA,         &
                                                 FLQC_SEA,         &
                                                 HFX_SEA,          &
-						HFX_PG_SEA,	  &
                                                 LH_SEA,           &
-						LH_PG_SEA,	  &
                                                 QFX_SEA,          &
-						QFX_PG_SEA,	  &
                                                 QGH_SEA,          &
                                                 QSFC_SEA,         &
                                                 ZNT_SEA
@@ -5397,16 +5383,13 @@ TICE2TSK_IF2COLD,XICE_THRESHOLD,                                   &
                                                 FLQC_HOLD,        &
                                                 GZ1OZ0_HOLD,      &
                                                 HFX_HOLD,         &
-						HFX_PG_HOLD,      &
                                                 LH_HOLD,          &
-						LH_PG_HOLD,	  &
                                                 MOL_HOLD,         &
                                                 PSIH_HOLD,        &
                                                 PSIM_HOLD,        &
                                                 FH_HOLD,          &
                                                 FM_HOLD,          &
                                                 QFX_HOLD,         &
-						QFX_PG_HOLD,	  &
                                                 QGH_HOLD,         &
                                                 REGIME_HOLD,      &
                                                 RMOL_HOLD,        &
@@ -5415,22 +5398,16 @@ TICE2TSK_IF2COLD,XICE_THRESHOLD,                                   &
                                                 ZNT_HOLD,         &
                                                 ZOL_HOLD,         &
                                                 TH2_HOLD,         & !ssib
-						TH2_PG_HOLD,	  &
                                                 T2_HOLD,          & !ssib
-						T2_PG_HOLD,	  &
                                                 Q2_HOLD,          & !ssib
-						Q2_PG_HOLD,	  &
                                                 TSK_HOLD,         & !ssib
                                                 CD_SEA,           &
                                                 CDA_SEA,          &
                                                 CK_SEA,           &
                                                 CKA_SEA,          &
                                                 Q2_SEA,           &
-						Q2_PG_SEA,	  &
                                                 T2_SEA,           &
-						T2_PG_SEA,	  &
                                                 TH2_SEA,          &
-						TH2_PG_SEA,	  &
                                                 U10_SEA,          &
                                                 USTM_SEA,         &
                                                 V10_SEA
@@ -5486,16 +5463,13 @@ TICE2TSK_IF2COLD,XICE_THRESHOLD,                                   &
      FLQC_HOLD = FLQC
      GZ1OZ0_HOLD = GZ1OZ0
      HFX_HOLD  = HFX
-     HFX_PG_HOLD = HFX_PG
      LH_HOLD   = LH
-     LH_PG_HOLD  = LH_PG
      MOL_HOLD  = MOL
      PSIH_HOLD = PSIH
      PSIM_HOLD = PSIM
      FH_HOLD   = FH
      FM_HOLD   = FM
      QFX_HOLD  = QFX
-     QFX_PG_HOLD = QFX_PG
      QGH_HOLD  = QGH
      REGIME_HOLD = REGIME
      RMOL_HOLD = RMOL
@@ -5505,11 +5479,8 @@ TICE2TSK_IF2COLD,XICE_THRESHOLD,                                   &
      ZOL_HOLD  = ZOL
 !also save these variables for SSIB (fds 12/2010)
      TH2_HOLD = TH2
-     TH2_PG_HOLD = TH2_PG
      T2_HOLD = T2
-     T2_PG_HOLD = T2_PG
      Q2_HOLD = Q2
-     Q2_PG_HOLD = Q2_PG
      TSK_HOLD = TSK
      
 ! INTENT(OUT) from SFCLAY.  Input shouldn't matter, but we'll want to
@@ -5527,30 +5498,13 @@ TICE2TSK_IF2COLD,XICE_THRESHOLD,                                   &
      ! V10
 
 ! ORIGINAL ------------------------------------------------------------------------------------
-!     ! land/frozen-water call
-!     call sfclayrev(U3D,V3D,T3D,QV3D,P3D,dz8w,                    & ! I
-!                 CP,G,ROVCP,R,XLV,PSFC,CHS,CHS2,CQS2,CPM,      & ! I,I,I,I,I,I,IO,IO,IO,IO,
-!                 ZNT,UST,PBLH,MAVAIL,ZOL,MOL,REGIME,PSIM,PSIH, &
-!                 FM,FH,                                        &
-!                 XLAND,HFX,QFX,LH,TSK_LOCAL,FLHC,FLQC,QGH,QSFC,RMOL, &
-!                 U10,V10,TH2,T2,Q2,                            &
-!                 GZ1OZ0,WSPD,BR,ISFFLX,DX,                     &
-!                 SVP1,SVP2,SVP3,SVPT0,EP1,EP2,                 &
-!                 KARMAN,EOMEG,STBOLT,                          &
-!                 P1000,                                      &
-!                 ids,ide, jds,jde, kds,kde,                    &
-!                 ims,ime, jms,jme, kms,kme,                    &
-!                 its,ite, jts,jte, kts,kte,                    &
-!                 ustm,ck,cka,cd,cda,isftcflx,iz0tlnd           )
-! ORIGINAL -------------------------------------------------------------------------------------
-! 2021. 07. 04. piggybacking modified by SN followed by X.L.
-         CALL SFCLAYREV(U3D,V3D,T3D,T3D_PG,QV3D,QV3D_PG,P3D,dz8w,                    & ! I
+     ! land/frozen-water call
+     call sfclayrev(U3D,V3D,T3D,QV3D,P3D,dz8w,                    & ! I
                  CP,G,ROVCP,R,XLV,PSFC,CHS,CHS2,CQS2,CPM,      & ! I,I,I,I,I,I,IO,IO,IO,IO,
                  ZNT,UST,PBLH,MAVAIL,ZOL,MOL,REGIME,PSIM,PSIH, &
                  FM,FH,                                        &
-                 XLAND,HFX,HFX_PG,QFX,QFX_PG,LH,LH_PG,TSK_LOCAL,FLHC,   &
-                 FLQC,QGH,QSFC,RMOL, &
-                 U10,V10,TH2,TH2_PG,T2,T2_PG,Q2,Q2_PG,                            &
+                 XLAND,HFX,QFX,LH,TSK_LOCAL,FLHC,FLQC,QGH,QSFC,RMOL, &
+                 U10,V10,TH2,T2,Q2,                            &
                  GZ1OZ0,WSPD,BR,ISFFLX,DX,                     &
                  SVP1,SVP2,SVP3,SVPT0,EP1,EP2,                 &
                  KARMAN,EOMEG,STBOLT,                          &
@@ -5558,9 +5512,8 @@ TICE2TSK_IF2COLD,XICE_THRESHOLD,                                   &
                  ids,ide, jds,jde, kds,kde,                    &
                  ims,ime, jms,jme, kms,kme,                    &
                  its,ite, jts,jte, kts,kte,                    &
-                 ustm,ck,cka,cd,cda,isftcflx,iz0tlnd,sf_surface_physics,&
-                 itimestep,dt    )
-
+                 ustm,ck,cka,cd,cda,isftcflx,iz0tlnd           )
+! ORIGINAL -------------------------------------------------------------------------------------
 
 !
 !Restore land-point values calculated by SSiB (fds 12/2010)
@@ -5580,12 +5533,6 @@ TICE2TSK_IF2COLD,XICE_THRESHOLD,                                   &
               ZNT(I,J) = ZNT_HOLD(I,J)
               UST(I,J) = UST_HOLD(I,J)
 !             TSK(I,J) = TSK_HOLD(I,J)
-              TH2_PG(I,J) = TH2_PG_HOLD(I,J)
-              T2_PG(I,J) = T2_PG_HOLD(I,J)
-              Q2_PG(I,J) = Q2_PG_HOLD(I,J)
-              HFX_PG(I,J) = HFX_PG_HOLD(I,J)
-              QFX_PG(I,J) = QFX_PG_HOLD(I,J)
-              LH_PG(I,J) = LH_PG_HOLD(I,J)
            ENDIF
         ENDDO
      ENDDO
@@ -5622,16 +5569,13 @@ TICE2TSK_IF2COLD,XICE_THRESHOLD,                                   &
      FLQC_SEA = FLQC_HOLD
      GZ1OZ0_SEA = GZ1OZ0_HOLD
      HFX_SEA  = HFX_HOLD
-     HFX_PG_SEA = HFX_PG_HOLD
      LH_SEA   = LH_HOLD
-     LH_PG_SEA = LH_PG_HOLD
      MOL_SEA  = MOL_HOLD
      PSIH_SEA = PSIH_HOLD
      PSIM_SEA = PSIM_HOLD
      FH_SEA   = FH_HOLD
      FM_SEA   = FM_HOLD
      QFX_SEA  = QFX_HOLD
-     QFX_PG_SEA = QFX_PG_HOLD
      QGH_SEA  = QGH_HOLD
      REGIME_SEA = REGIME_HOLD
      RMOL_SEA = RMOL_HOLD
@@ -5642,30 +5586,7 @@ TICE2TSK_IF2COLD,XICE_THRESHOLD,                                   &
 
      ! open-water call
 ! ORIGINAL ----------------------------------------------------------------
-!     call sfclayrev(U3D,V3D,T3D,QV3D,P3D,dz8w,                    & ! I
-!                 CP,G,ROVCP,R,XLV,PSFC,                        & ! I
-!                 CHS_SEA,CHS2_SEA,CQS2_SEA,CPM_SEA,            & ! I/O
-!                 ZNT_SEA,UST_SEA,                              & ! I/O
-!                 PBLH,MAVAIL_SEA,                              & ! I
-!                 ZOL_SEA,MOL_SEA,REGIME_SEA,PSIM_SEA,PSIH_SEA, & ! I/O
-!                 FM_SEA,FH_SEA,                                &
-!                 XLAND_SEA,                              & ! I
-!                 HFX_SEA,QFX_SEA,LH_SEA,                       & ! I/O
-!                 TSK_SEA,                                      & ! I
-!                 FLHC_SEA,FLQC_SEA,QGH_SEA,QSFC_sea,RMOL_SEA,  & ! I/O
-!                 U10_sea,V10_sea,TH2_sea,T2_sea,Q2_sea,        & ! O
-!                 GZ1OZ0_SEA,WSPD_SEA,BR_SEA,                   & ! I/O
-!                 ISFFLX,DX,                                    &
-!                 SVP1,SVP2,SVP3,SVPT0,EP1,EP2,                 &
-!                 KARMAN,EOMEG,STBOLT,                          &
-!                 P1000,                                      &
-!                 ids,ide, jds,jde, kds,kde,                    &
-!                 ims,ime, jms,jme, kms,kme,                    &
-!                 its,ite, jts,jte, kts,kte,                    & ! 0
-!                 ustm_sea,ck_sea,cka_sea,cd_sea,cda_sea,isftcflx,iz0tlnd )
-
-! 2021. 07. 04. piggybacking modified by SN followed by X.L.
-         CALL SFCLAYREV(U3D,V3D,T3D,T3D_PG,QV3D,QV3D_PG,P3D,dz8w,                    & ! I
+     call sfclayrev(U3D,V3D,T3D,QV3D,P3D,dz8w,                    & ! I
                  CP,G,ROVCP,R,XLV,PSFC,                        & ! I
                  CHS_SEA,CHS2_SEA,CQS2_SEA,CPM_SEA,            & ! I/O
                  ZNT_SEA,UST_SEA,                              & ! I/O
@@ -5673,11 +5594,10 @@ TICE2TSK_IF2COLD,XICE_THRESHOLD,                                   &
                  ZOL_SEA,MOL_SEA,REGIME_SEA,PSIM_SEA,PSIH_SEA, & ! I/O
                  FM_SEA,FH_SEA,                                &
                  XLAND_SEA,                              & ! I
-                 HFX_SEA,HFX_PG_SEA,QFX_SEA,QFX_PG_SEA,LH_SEA,LH_PG_SEA,                       & ! I/O
+                 HFX_SEA,QFX_SEA,LH_SEA,                       & ! I/O
                  TSK_SEA,                                      & ! I
                  FLHC_SEA,FLQC_SEA,QGH_SEA,QSFC_sea,RMOL_SEA,  & ! I/O
-                 U10_sea,V10_sea,TH2_sea,TH2_PG_SEA,T2_sea,T2_PG_SEA,&
-                 Q2_sea,Q2_PG_SEA,        & ! O
+                 U10_sea,V10_sea,TH2_sea,T2_sea,Q2_sea,        & ! O
                  GZ1OZ0_SEA,WSPD_SEA,BR_SEA,                   & ! I/O
                  ISFFLX,DX,                                    &
                  SVP1,SVP2,SVP3,SVPT0,EP1,EP2,                 &
@@ -5686,9 +5606,7 @@ TICE2TSK_IF2COLD,XICE_THRESHOLD,                                   &
                  ids,ide, jds,jde, kds,kde,                    &
                  ims,ime, jms,jme, kms,kme,                    &
                  its,ite, jts,jte, kts,kte,                    & ! 0
-                 ustm_sea,ck_sea,cka_sea,cd_sea,cda_sea,isftcflx,  &
-                 iz0tlnd,sf_surface_physics,itimestep,dt   )
-
+                 ustm_sea,ck_sea,cka_sea,cd_sea,cda_sea,isftcflx,iz0tlnd )
 
 !
      DO j = JTS , JTE

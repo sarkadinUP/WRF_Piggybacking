@@ -177,9 +177,9 @@ CONTAINS
                               ips,ipe, jps,jpe, kps,kpe,  & ! patch  dims
                               its, ite, jts, jte, kts, kte, &
 !... Piggybacking variables added by SN OPTIONAL          
-							  t_tendf_pg,t_pg,              &
+		    	      t_tendf_pg,t_pg,              &
                               t_pg_bxs,t_pg_bxe,t_pg_bys,t_pg_bye,             &							  
-                              t_pg_btxs,t_pg_btxe,t_pg_btys,t_pg_btye,         &							  
+                              t_pg_btxs,t_pg_btxe,t_pg_btys,t_pg_btye         &							  
 							  ) 	
 							  
    IMPLICIT NONE
@@ -503,7 +503,7 @@ CONTAINS
 !... Piggybacking variables added by SN OPTIONAL          
 							 t_tend_pg,              &
                              t_pg_bxs,t_pg_bxe,t_pg_bys,t_pg_bye, &							 
-                             t_pg_btxs,t_pg_btxe,t_pg_btys,t_pg_btye,&							 
+                             t_pg_btxs,t_pg_btxe,t_pg_btys,t_pg_btye  &							 
 							  ) 
 							 
    IMPLICIT NONE
@@ -835,7 +835,7 @@ CONTAINS
                                  ips,ipe, jps,jpe, kps,kpe,      &
                                  its,ite, jts,jte, kts,kte,      &
 !... Piggybacking variables added by SN OPTIONAL          
-							     t_pg_1, t_pg_2) 								
+			         t_pg_1, t_pg_2) 								
 
 !
 !  this is just a wraper to call the boundary condition routines
@@ -951,7 +951,7 @@ CONTAINS
                                  ips,ipe, jps,jpe, kps,kpe,        &
                                  its,ite, jts,jte, kts,kte,        &
 !... Piggybacking variables added by SN OPTIONAL          
-							     t_pg_1, t_pg_2) 									 
+				  t_pg_1, t_pg_2) 									 
 
 !
 !  this is just a wraper to call the boundary condition routines
@@ -972,7 +972,7 @@ CONTAINS
          t_1, t_2, ph_1, ph_2
 		 
       REAL, DIMENSION( ims:ime, kms:kme, jms:jme ), INTENT(INOUT),OPTIONAL :: &
-         t_pg_1, t_pg_2,
+         t_pg_1, t_pg_2
 
       REAL, DIMENSION( ims:ime, jms:jme ), INTENT(INOUT) :: &
                              mu_1, mu_2
@@ -1204,7 +1204,7 @@ CONTAINS
                                ips,ipe, jps,jpe, kps,kpe,  &
                                its,ite, jts,jte, kts,kte,  &
 !... Piggybacking variables added by SN OPTIONAL          
-							   t_pg) 								  
+			       t_pg) 								  
 
 !
 !  this is just a wraper to call the boundary condition routines

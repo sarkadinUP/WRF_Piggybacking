@@ -464,7 +464,7 @@ state   real   DMW_RIME    ikj   misc   1   -   h   "DMW_RIME"    "dm/dt for wat
 state   real   DMW_FREZ    ikj   misc   1   -   h   "DMW_FREZ"    "dm/dt for water drops mixing raito by freezing (all ice)"                    "kg kg-1 s-1"
 state   real   DMG_RIME    ikj   misc   1   -   h   "DMG_RIME"    "dm/dt for graupel mixing raito by riming (all ice)"                          "kg kg-1 s-1"
 
-ifdef DA_CORE=0
+
 package   detailed       mp_physics==99               -            moist:qv,qc,qr,qi,qs,qg;scalar:qnc,qnr,qni,qns,qng,mc1,mc2,mc3,mc4,mc5,mc6,mc7,mc8,mc9,mc10,mc11,mc12,mc13,mc14,mc15,mc16,mc17,mc18,mc19,mc20,mc21,mc22,mc23,mc24,mc25,mc26,mc27,mc28,mc29,mc30,mc31,mc32,mc33,mc34,mc35,mc36,mi1,mi2,mi3,mi4,mi5,mi6,mi7,mi8,mi9,mi10,mi11,mi12,mi13,mi14,mi15,mi16,mi17,mi18,mi19,mi20,mi21,mi22,mi23,mi24,mi25,mi26,mi27,mi28,mi29,mi30,mi31,mi32,mi33,mi34,mi35,mi36,mr1,mr2,mr3,mr4,mr5,mr6,mr7,mr8,mr9,mr10,mr11,mr12,mr13,mr14,mr15,mr16,mr17,mr18,mr19,mr20,mr21,mr22,mr23,mr24,mr25,mr26,mr27,mr28,mr29,mr30,mr31,mr32,mr33,mr34,mr35,mr36,mg1,mg2,mg3,mg4,mg5,mg6,mg7,mg8,mg9,mg10,mg11,mg12,mg13,mg14,mg15,mg16,mg17,m\
 g18,mg19,mg20,mg21,mg22,mg23,mg24,mg25,mg26,mg27,mg28,mg29,mg30,mg31,mg32,mg33,mg34,mg35,mg36,mx1,mx2,mx3,mx4,mx5,mx6,mx7,mx8,mx9,mx10,mx11,mx12,mx13,mx14,mx15,mx16,mx17,mx18,mx19,mx20,mx21,mx22,mx23,mx24,mx25,mx26,mx27,mx28,mx29,mx30,m\
 x31,mx32,mx33,mx34,mx35,mx36,my1,my2,my3,my4,my5,my6,my7,my8,my9,my10,my11,my12,my13,my14,my15,my16,my17,my18,my19,my20,my21,my22,my23,my24,my25,my26,my27,my28,my29,my30,my31,my32,my33,my34,my35,my36,mz1,mz2,mz3,mz4,mz5,mz6,mz7,mz8,mz9,\
@@ -473,4 +473,3 @@ mz10,mz11,mz12,mz13,mz14,mz15,mz16,mz17,mz18,mz19,mz20,mz21,mz22,mz23,mz24,mz25,
 nr7,nr8,nr9,nr10,nr11,nr12,nr13,nr14,nr15,nr16,nr17,nr18,nr19,nr20,nr21,nr22,nr23,nr24,nr25,nr26,nr27,nr28,nr29,nr30,nr31,nr32,nr33,nr34,nr35,nr36,ng1,ng2,ng3,ng4,ng5,ng6,ng7,ng8,ng9,ng10,ng11,ng12,ng13,ng14,ng15,ng16,ng17,ng18,ng19,ng2\
 0,ng21,ng22,ng23,ng24,ng25,ng26,ng27,ng28,ng29,ng30,ng31,ng32,ng33,ng34,ng35,ng36,nx1,nx2,nx3,nx4,nx5,nx6,nx7,nx8,nx9,nx10,nx11,nx12,nx13,nx14,nx15,nx16,nx17,nx18,nx19,nx20,nx21,nx22,nx23,nx24,nx25,nx26,nx27,nx28,nx29,nx30,nx31,nx32,nx3\
 3,nx34,nx35,nx36,ccn,nidep,ccnm,ccns,qnrs,qfws,qmws,qmwg;state:tk_am,ssw,ssi,DNW_ACTV,DNW_COAG,DNW_BRUP,DNI_COLL,DMW_DIFF,DMW_MELT,DMWI_MELT,DMI_DIFF,DMWI_DIFF,DMW_RIME,DMW_FREZ,DMG_RIME
-endif

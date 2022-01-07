@@ -285,12 +285,10 @@ BENCH_START(rad_driver_tim)
      &        ,RADT=grid%radt          ,RA_CALL_OFFSET=grid%ra_call_offset           &
      &        ,RHO=grid%rho            ,RLWTOA=grid%rlwtoa                           &
      &        ,RSWTOA=grid%rswtoa      ,RTHRATEN=grid%rthraten                       &
-	 &        ,RTHRATENPG = grid%rthratenpg                                         &  ! piggybacking
-     &        ,RTHRATENLW=grid%rthratenlw   , RTHRATENLW_PG=grid%rthratenlwpg        &
-	 &        ,RTHRATENSW=grid%rthratensw   , RTHRATENSW_PG=grid%rthratenswpg        &        &
+     &        ,RTHRATENLW=grid%rthratenlw      ,RTHRATENSW=grid%rthratensw           &
      &        ,SNOW=grid%snow          ,STEPRA=grid%stepra      ,SWDOWN=grid%swdown  &
      &        ,SWDOWNC=grid%swdownc    ,SW_PHYSICS=config_flags%ra_sw_physics        &
-     &        ,T8W=t8w, T8W_PG=t8w_pg, T=grid%t_phy, T_PG=grid%t_phy_pg  ,TAUCLDC=grid%taucldc &
+     &        ,T8W=t8w,  T=grid%t_phy   ,TAUCLDC=grid%taucldc &
      &        ,TAUCLDI=grid%taucldi    ,TSK=grid%tsk            ,VEGFRA=grid%vegfra  &
      &        ,WARM_RAIN=grid%warm_rain ,XICE=grid%xice         ,XLAND=grid%xland    &
      &        ,XLAT=grid%xlat          ,XLONG=grid%xlong        ,YR=yr               &
@@ -341,7 +339,7 @@ BENCH_START(rad_driver_tim)
 !ZCX+ cloud fraction for CLWRF
      &        , CLDT=grid%cldt, ZNU=grid%znu                              &
 !ZCX-
-     &        , CLDFRA=grid%cldfra, CLDFRA_PG=grid%cldfra_pg, CLDFRA_MP_ALL=grid%cldfra_mp_all      &
+     &        , CLDFRA=grid%cldfra,  CLDFRA_MP_ALL=grid%cldfra_mp_all      &
      &        , LRADIUS=grid%LRADIUS,IRADIUS=grid%IRADIUS                 & !BSINGH(01/22/2014)
      &        , CLDFRA_DP=grid%cldfra_dp                                  & ! ckay for subgrid cloud
      &        , CLDFRA_SH=grid%cldfra_sh                                  &
@@ -356,15 +354,6 @@ BENCH_START(rad_driver_tim)
      &        , QS=moist(ims,kms,jms,P_QS), F_QS=F_QS                     &
      &        , QG=moist(ims,kms,jms,P_QG), F_QG=F_QG                     &
      &        , QNDROP=scalar(ims,kms,jms,P_QNDROP), F_QNDROP=F_QNDROP    &
-!! Piggybacking variables for microphysics
-     &        , QV_PG=scalar(ims,kms,jms,P_QV_PG), F_QV_PG=F_QV_PG                     &
-     &        , QC_PG=scalar(ims,kms,jms,P_QC_PG), F_QC_PG=F_QC_PG                     &
-     &        , QR_PG=scalar(ims,kms,jms,P_QR_PG), F_QR_PG=F_QR_PG                     &
-     &        , QI_PG=scalar(ims,kms,jms,P_QI_PG), F_QI_PG=F_QI_PG                     &
-     &        , QS_PG=scalar(ims,kms,jms,P_QS_PG), F_QS_PG=F_QS_PG                     &
-     &        , QG_PG=scalar(ims,kms,jms,P_QG_PG), F_QG_PG=F_QG_PG                     &
-     &        , QNDROP_PG=scalar(ims,kms,jms,P_QNDROP_PG), F_QNDROP_PG=F_QNDROP_PG    &
-!! Piggybacking variables for microphysics end
      &        ,ACSWUPT=grid%acswupt    ,ACSWUPTC=grid%acswuptc            &
      &        ,ACSWDNT=grid%acswdnt    ,ACSWDNTC=grid%acswdntc            &
      &        ,ACSWUPB=grid%acswupb    ,ACSWUPBC=grid%acswupbc            &
@@ -696,7 +685,7 @@ BENCH_START(surf_driver_tim)
      &        ,ssib_shc=grid%ssib_shc, ssib_shg=grid%ssib_shg            & !ssib
      &        ,ssib_lai=grid%ssib_lai, ssib_vcf=grid%ssib_vcf            & !ssib
      &        ,ssib_z00=grid%ssib_z00, ssib_veg=grid%ssib_veg            & !ssib
-     &        ,cldfra=grid%cldfra,cldfra_pg=grid%cldfra_pg               & !ssib
+     &        ,cldfra=grid%cldfra                                        & !ssib
      &        ,ISNOW=grid%isnow, SWE=grid%swe, SNOWDEN=grid%snowden      & !ssib snow
      &        ,SNOWDEPTH=grid%snowdepth, TKAIR=grid%tkair                & !ssib snow
      &        ,DZO1=grid%dzo1, WO1=grid%wo1, TSSN1=grid%tssn1, TSSNO1=grid%tssno1     & !ssib snow
@@ -873,21 +862,21 @@ BENCH_START(pbl_driver_tim)
      &        ,EXCH_H=grid%exch_h     ,EXCH_M=grid%exch_m                           &
      &        ,FM=grid%fm         ,FHH=grid%fh                                      &
      &        ,F=grid%f  ,GRDFLX=grid%grdflx      &
-     &        ,GZ1OZ0=gz1oz0  ,HFX=grid%hfx, HFX_PG=grid%hfx_pg     ,HT=grid%ht     &
+     &        ,GZ1OZ0=gz1oz0  ,HFX=grid%hfx, HT=grid%ht     &
      &        ,ID=grid%id         ,ITIMESTEP=grid%itimestep     ,KPBL=grid%kpbl          &
-     &        ,LH=grid%lh, LH_PG=grid%lh_pg       ,LOWLYR=grid%lowlyr      ,P8W=grid%p_hyd_w   &
+     &        ,LH=grid%lh      ,LOWLYR=grid%lowlyr      ,P8W=grid%p_hyd_w   &
      &        ,PBLH=grid%pblh          ,PI_PHY=pi_phy      ,PSIH=psih          &
-     &        ,PSIM=psim    ,P_PHY=grid%p_hyd    ,QFX=grid%qfx, QFX_PG=grid%qfx_pg  &
+     &        ,PSIM=psim    ,P_PHY=grid%p_hyd    ,QFX=grid%qfx           &
      &        ,QSFC=grid%qsfc          ,QZ0=grid%qz0  ,MIXHT=mixht                  &
      &        ,RA_LW_PHYSICS=config_flags%ra_lw_physics                   &
-     &        ,RHO=grid%rho            ,RQCBLTEN=grid%rqcblten  , RQCBLTENPG=grid%rqcbltenpg &
-     &        ,RQIBLTEN=grid%rqiblten  ,RQIBLTENPG=grid%rqibltenpg        &
-     &        ,RQVBLTEN=grid%rqvblten  ,RQVBLTENPG=grid%rqvbltenpg        &
-     &        ,RTHBLTEN=grid%rthblten  ,RTHBLTENPG=grid%rthbltenpg        &
+     &        ,RHO=grid%rho            ,RQCBLTEN=grid%rqcblten            &
+     &        ,RQIBLTEN=grid%rqiblten         &
+     &        ,RQVBLTEN=grid%rqvblten         &
+     &        ,RTHBLTEN=grid%rthblten         &
      &        ,RUBLTEN=grid%rublten    &
      &        ,RVBLTEN=grid%rvblten    ,SNOW=grid%snow          ,STEPBL=grid%stepbl      &
-     &        ,THZ0=grid%thz0          ,TH_PHY=th_phy, TH_PHY_PG=th_phy_pg          &
-     &        ,TSK=grid%tsk            ,T_PHY=grid%t_phy, T_PHY_PG=grid%t_phy_pg     ,UST=grid%ust       &
+     &        ,THZ0=grid%thz0          ,TH_PHY=th_phy          &
+     &        ,TSK=grid%tsk            ,T_PHY=grid%t_phy     ,UST=grid%ust       &
      &        ,U10=grid%u10 ,UZ0=grid%uz0      ,U_FRAME=grid%u_frame    ,U_PHY=grid%u_phy   &
      &        ,V10=grid%v10 ,VZ0=grid%vz0      ,V_FRAME=grid%v_frame    ,V_PHY=grid%v_phy   &
      &        ,UOCE=grid%uoce          ,VOCE=grid%voce                              &
@@ -916,7 +905,7 @@ BENCH_START(pbl_driver_tim)
      &          ,WV_tur=grid%wv_tur,WT_tur=grid%wt_tur,WQ_tur=grid%wq_tur                &
 ! end add tke_pbl, and turbulent fluxes
 ! GBMPBL change: add exch_tke, rthraten
-     &        ,EXCH_TKE=grid%exch_tke, RTHRATEN=grid%rthraten, RTHRATENPG =grid%rthratenpg &
+     &        ,EXCH_TKE=grid%exch_tke, RTHRATEN=grid%rthraten             &
      &        ,IDS=ids,IDE=ide, JDS=jds,JDE=jde, KDS=kds,KDE=kde          &
      &        ,IMS=ims,IME=ime, JMS=jms,JME=jme, KMS=kms,KME=kme          &
      &        ,I_START=grid%i_start,I_END=min(grid%i_end, ide-1)          &
@@ -945,13 +934,6 @@ BENCH_START(pbl_driver_tim)
      &        ,QI_CURR=moist(ims,kms,jms,P_QI), F_QI=F_QI                 &
      &        ,QS_CURR=moist(ims,kms,jms,P_QS), F_QS=F_QS                 &
      &        ,QG_CURR=moist(ims,kms,jms,P_QG), F_QG=F_QG                 &
-!! Optional piggybacking variables
-     &        ,QV_CURR_PG=scalar(ims,kms,jms,P_QV_PG), F_QV_PG=F_QV_PG     &
-     &        ,QC_CURR_PG=scalar(ims,kms,jms,P_QC_PG), F_QC_PG=F_QC_PG     &
-     &        ,QR_CURR_PG=scalar(ims,kms,jms,P_QR_PG), F_QR_PG=F_QR_PG     &
-     &        ,QI_CURR_PG=scalar(ims,kms,jms,P_QI_PG), F_QI_PG=F_QI_PG     &
-     &        ,QS_CURR_PG=scalar(ims,kms,jms,P_QS_PG), F_QS_PG=F_QS_PG     &
-     &        ,QG_CURR_PG=scalar(ims,kms,jms,P_QG_PG), F_QG_PG=F_QG_PG     &
 !! Optional piggybacking variables end	 
      &        ,HOL=HOL, MOL=grid%mol, REGIME=grid%REGIME                  &
 !mynn mp@
@@ -986,8 +968,8 @@ BENCH_START(pbl_driver_tim)
      &        ,XLAT_U=grid%xlat_u,XLONG_U=grid%xlong_u                    &
 !Variables required for camuwpbl scheme
      &        ,Z_AT_W=grid%z_at_w,CLDFRA_OLD_MP=grid%cldfra_old_mp        &
-     &        ,CLDFRA=grid%cldfra, CLDFRA_PG = grid%cldfra_pg            &
-     &        ,RTHRATENLW=grid%rthratenlw,RTHRATENLW_PG=grid%rthratenlwpg,TAURESX2D=grid%tauresx2d        &
+     &        ,CLDFRA=grid%cldfra         &
+     &        ,RTHRATENLW=grid%rthratenlw,TAURESX2D=grid%tauresx2d        &
      &        ,TAURESY2D=grid%tauresy2d                                   &
      &        ,TPERT2D=grid%tpert2d,QPERT2D=grid%qpert2d                  &
      &        ,WPERT2D=grid%wpert2d,WSEDL3D=grid%wsedl3d                  &
@@ -995,9 +977,6 @@ BENCH_START(pbl_driver_tim)
      &        ,QNC_CURR=scalar(ims,kms,jms,P_QNC), F_QNC=f_qnc            &
      &        ,QNI_CURR=scalar(ims,kms,jms,P_QNI), F_QNI=f_qni            &
      &        ,RQNIBLTEN=grid%rqniblten                                   &
-     &        ,QNC_CURR_PG=scalar(ims,kms,jms,P_QNC_PG), F_QNC_PG=f_qnc_pg            &
-     &        ,QNI_CURR_PG=scalar(ims,kms,jms,P_QNI_PG), F_QNI_PG=f_qni_pg            &
-     &        ,RQNIBLTENPG=grid%rqnibltenpg                                   &	 
      &        ,XLAT_V=grid%xlat_v,XLONG_V=grid%xlong_v,FNM=grid%fnm       &
      &        ,FNP=grid%fnp, IS_CAMMGMP_USED = grid%is_CAMMGMP_used       &
 ! for grims shallow convection with ysupbl
